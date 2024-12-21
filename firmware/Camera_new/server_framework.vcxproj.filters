@@ -1,0 +1,132 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx</Extensions>
+    </Filter>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="libstl\adlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libaenet\ae.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libpthread\bio.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\crc64.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\debugmacro.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libstl\dict.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\endianconv.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libaenet\net.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libstl\pqsort.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\rand.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libstl\sds.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libstl\sdsalloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="main\server.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\sha1.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\types.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libaenet\zmalloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="libutility\zmalloc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="libstl\adlist.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libaenet\ae.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libpthread\bio.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\crc16.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\crc64.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libstl\dict.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\endianconv.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libaenet\epoll.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libaenet\net.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main\networking.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libstl\pqsort.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\rand.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libstl\sds.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libaenet\select.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="main\server.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\sha1.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libaenet\zmalloc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="libutility\zmalloc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

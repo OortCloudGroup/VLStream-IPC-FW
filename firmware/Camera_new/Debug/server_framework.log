@@ -1,0 +1,170 @@
+﻿C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Platforms\Win32\PlatformToolsets\v140_xp\Toolset.targets(36,5): warning MSB8003: Could not find WindowsSdkDir_71A variable from the registry.  TargetFrameworkVersion or PlatformToolset may be set to an invalid version number.
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(366,5): warning MSB8003: Could not find WindowsSDKDir variable from the registry.  TargetFrameworkVersion or PlatformToolset may be set to an invalid version number.
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppBuild.targets(936,5): warning MSB8027: Two or more files with the name of zmalloc.c will produce outputs to the same location. This can lead to an incorrect build result.  The files involved are libaenet\zmalloc.c, libutility\zmalloc.c.
+  server.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\main\server.h(17): fatal error C1083: 无法打开包括文件: “sys/wait.h”: No such file or directory
+  networking.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\main\server.h(17): fatal error C1083: 无法打开包括文件: “sys/wait.h”: No such file or directory
+  zmalloc.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libutility\zmalloc.c(17): fatal error C1083: 无法打开包括文件: “pthread.h”: No such file or directory
+  util.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libutility\util.c(9): fatal error C1083: 无法打开包括文件: “unistd.h”: No such file or directory
+  sha1.c
+  rand.c
+  endianconv.c
+  crc64.c
+  crc16.c
+  sds.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(18): error C2061: 语法错误: 标识符“sdshdr5”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(18): error C2059: 语法错误:“;”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(18): error C2449: 在文件范围内找到“{”(是否缺少函数头?)
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(21): error C2059: 语法错误:“}”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(28): error C2061: 语法错误: 标识符“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(28): error C2059: 语法错误:“;”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(28): error C2449: 在文件范围内找到“{”(是否缺少函数头?)
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(33): error C2059: 语法错误:“}”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(40): error C2061: 语法错误: 标识符“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(40): error C2059: 语法错误:“;”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(40): error C2449: 在文件范围内找到“{”(是否缺少函数头?)
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(45): error C2059: 语法错误:“}”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(82): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(82): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(83): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(83): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(83): warning C4033: “sdsavail”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(86): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(86): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(87): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(87): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(87): warning C4033: “sdsavail”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(90): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(90): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(91): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(91): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(91): warning C4033: “sdsavail”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(94): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(94): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(95): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(95): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(95): warning C4033: “sdsavail”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(107): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(111): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(111): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(111): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(114): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(114): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(114): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(117): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(117): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(117): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(120): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(120): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(120): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(136): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(136): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(136): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(139): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(139): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(139): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(142): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(142): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(142): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(145): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(145): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(145): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(131): warning C4267: “初始化”: 从“size_t”转换到“unsigned char”，可能丢失数据
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(157): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(157): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(157): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(157): warning C4033: “sdsalloc”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(159): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(159): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(159): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(159): warning C4033: “sdsalloc”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(161): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(161): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(161): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(161): warning C4033: “sdsalloc”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(163): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(163): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(163): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(163): warning C4033: “sdsalloc”必须返回值
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(175): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(175): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(175): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(178): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(178): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(178): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(181): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(181): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(181): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(184): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(184): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.h(184): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(16): error C2027: 使用了未定义类型“sdshdr5”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(16): note: 参见“sdshdr5”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(18): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(18): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(20): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(20): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(22): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(22): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(24): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(24): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(71): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(75): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(75): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(76): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(77): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(82): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(82): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(83): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(84): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(89): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(89): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(90): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(91): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(96): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(96): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(97): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(98): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(123): warning C4013: “sdslen”未定义；假设外部返回 int
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(297): error C2027: 使用了未定义类型“sdshdr8”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(297): note: 参见“sdshdr8”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(298): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(298): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(299): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr8”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(303): error C2027: 使用了未定义类型“sdshdr16”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(303): note: 参见“sdshdr16”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(304): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(304): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(305): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr16”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(309): error C2027: 使用了未定义类型“sdshdr32”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(309): note: 参见“sdshdr32”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(310): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(310): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(311): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr32”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(315): error C2027: 使用了未定义类型“sdshdr64”
+  d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(315): note: 参见“sdshdr64”的声明
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(316): error C2037: “alloc”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(316): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\sds.c(317): error C2037: “len”的左侧部分指定未定义的结构/联合“sdshdr64”
+  pqsort.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\pqsort.c(49): warning C4005: “min”: 宏重定义
+  e:\windows kits\10\include\10.0.10240.0\ucrt\stdlib.h(1283): note: 参见“min”的前一个定义
+  dict.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libstl\dict.c(16): fatal error C1083: 无法打开包括文件: “sys/time.h”: No such file or directory
+  adlist.c
+  bio.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libpthread\bio.h(4): fatal error C1083: 无法打开包括文件: “libstl.h”: No such file or directory
+  zmalloc.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libaenet\zmalloc.c(17): fatal error C1083: 无法打开包括文件: “pthread.h”: No such file or directory
+  select.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libaenet\select.c(6): fatal error C1083: 无法打开包括文件: “sys/select.h”: No such file or directory
+  net.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libaenet\net.c(6): fatal error C1083: 无法打开包括文件: “sys/socket.h”: No such file or directory
+  epoll.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libaenet\epoll.c(5): fatal error C1083: 无法打开包括文件: “sys/epoll.h”: No such file or directory
+  ae.c
+d:\git\linux_code\vlstream-ipc-fw\firmware\camera_new\libaenet\ae.c(7): fatal error C1083: 无法打开包括文件: “sys/time.h”: No such file or directory
+  正在生成代码...
