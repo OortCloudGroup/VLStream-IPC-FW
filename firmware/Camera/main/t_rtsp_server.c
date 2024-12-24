@@ -1,7 +1,8 @@
 #include "../libpthread/libpthread.h"
+#include "../libutility/libutility.h"
 
 #include "t_rtsp_server.h"
-#include "../librtsp/include/rtsp_server.h"
+#include "rtsp_server.h"
 
 #define RTSP_THREAD_ALIVE_THRESHOLD				(60 * 100)
 #define RTSP_THREAD_PRIORITY						4
@@ -34,7 +35,7 @@ static void * rtsp_thread_function(void * arg)
 	
 	while (1)
 	{
-		// c->tick = get_tickcount();
+		c->tick = get_tickcount();
 		
 		// if (c->exit)
 		// {

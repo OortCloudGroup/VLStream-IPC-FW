@@ -90,9 +90,6 @@ void fbmapCamera_read(CameraMap_Struct *cms)
     }
 }
 
-/*
- *
- */
 void fbmapCamera_callback(void *argv)
 {
     CameraMap_Struct *cms = (CameraMap_Struct *)argv;
@@ -432,6 +429,7 @@ CameraMap_Struct *cameraMap_open(
     createthread(cms, (void *)fbmapCamera_callback);
     return cms;
 }
+
 
 /*
  *  关闭内存映射和文件

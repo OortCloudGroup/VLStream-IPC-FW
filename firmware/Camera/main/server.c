@@ -280,13 +280,13 @@ int main(int argc, char ** argv)
 		record_thread_alive = t_is_record_thread_alive();
 		rtsp_thread_alive = t_is_rtsp_thread_alive();
 		
-		if(!record_thread_alive)
+		if(!record_thread_alive 
+		|| !rtsp_thread_alive)
 		{
 			printf("main loop leave\n");
 			break;
 		}
-		
-		
+
 		usleep(500000);
 	}
 	printf("Camera Quiting ...\n");

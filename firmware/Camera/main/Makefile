@@ -12,14 +12,14 @@ include ../config.mk
 include ../server.mk
 
 EXTRALIB += -lae_stl -lae_pthread -lae_net -lae_log  -lae_utility  #-lae_protocol
-EXTRALIB += -lpthread -lrt -lrtsp #-ldl -lm -lc 
+EXTRALIB += -lpthread -lrt -lrtsp -lx264 -lm#-ldl -lm -lc 
 
 ifeq ($(USE_SSL),y)
 EXTRALIB += -lssl -lcrypto 
 endif
 
 #------------------------------------------------- 
-OBJS = server.o server_cron.o t_dict.o option.o networking.o t_record.o fbmap.o t_rtsp_server.o rtsp_server.o
+OBJS = server.o server_cron.o t_dict.o option.o networking.o t_record.o fbmap.o t_rtsp_server.o rtsp_server.o h264encoder.o
 #-------------------------------------------------
 TARGET = server
 #-------------------------------------------------
