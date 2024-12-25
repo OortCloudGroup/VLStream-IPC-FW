@@ -1,9 +1,12 @@
 #ifndef _T_RECORD_H_
 #define _T_RECORD_H_
 
-extern THREAD_CONTEXT g_record_thread_context;
+#include "queue.h"
 
-bool t_create_record_thread();
+extern THREAD_CONTEXT g_record_thread_context;
+extern FrameQueue g_queue;
+
+bool t_create_record_thread(FrameQueue* queue);
 
 #define t_end_record_thread() end_thread(g_record_thread_context)
 

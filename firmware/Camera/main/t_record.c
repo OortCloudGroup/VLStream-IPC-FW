@@ -13,18 +13,22 @@
 #include "fbmap.h"
 #include "h264encoder.h"
 
+
+extern FrameQueue g_queue;  // 引用全局队列
+
 #define RECORD_THREAD_ALIVE_THRESHOLD				(10 * 60 * 100)
 #define RECORD_THREAD_PRIORITY						3
 
 THREAD_CONTEXT g_record_thread_context;
 static void * record_thread_function(void * arg);
 
-bool t_create_record_thread()
+bool t_create_record_thread(FrameQueue* queue)
 {
 	bool ret;
 	g_record_thread_context.alive_threshold = RECORD_THREAD_ALIVE_THRESHOLD;
 	g_record_thread_context.handler = record_thread_function;
 	g_record_thread_context.priority = RECORD_THREAD_PRIORITY;
+    g_record_thread_context.queue = queue;
 	if (! (ret = create_thread(&g_record_thread_context)))
 		printf("%s: failed\n", __func__);
 	
@@ -37,7 +41,7 @@ bool t_create_record_thread()
 #define JPG "./out/image%d.jpg"
 #define WIDTH 640
 #define HIGHT 480
-#define COUNT 2000
+//#define COUNT 2000
 
 typedef struct
 {
@@ -79,17 +83,37 @@ void encode_frame(uint8_t *yuv_frame, size_t yuv_length)
 {
     int h264_length = 0;
     static int count = 0;
+    
+    // clock_t start, end;
+    // double cpu_time_used;
+
+    // // 获取程序开始执行的时刻
+    // start = clock();
+
     h264_length = compress_frame(&en, -1, yuv_frame, h264_buf);
+    //     // 获取程序执行完的时刻
+    // end = clock();
+
+    // 计算程序运行的时间（秒）
+    // cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
+
+    // printf("程序执行时间: %f 秒\n", cpu_time_used);
+
     if (h264_length > 0)
     {
-        if (fwrite(h264_buf, h264_length, 1, h264_fp) > 0)
-        {
-            //printf("encode_frame num = %d\n",count++);
-        }
-        else
-        {
-            perror("encode_frame fwrite err\n");
-        }
+        // 直接通过上下文获取队列
+        enqueue(&g_queue, h264_buf, h264_length);
+        // if (fwrite(h264_buf, h264_length, 1, h264_fp) > 0)
+        // {
+        //     // 直接通过上下文获取队列
+        //     enqueue(&g_queue, h264_buf, h264_length);
+        //     printf("encode_frame num = %d\n",count++);
+           
+        // }
+        // else
+        // {
+        //     perror("encode_frame fwrite err\n");
+        // }
     }
 }
 
@@ -388,9 +412,9 @@ static void * record_thread_function(void * arg)
     //     c->tick = get_tickcount();
 
 	// }
-    int count = COUNT;
-    while (count-- > 0)
+    while (! c->exit)
     {
+        c->tick = get_tickcount();
         while(1)
         {
             fd_set fds;
@@ -407,11 +431,13 @@ static void * record_thread_function(void * arg)
                 if (EINTR == errno)
                     continue;
                 // DEBUG_PRINT(DEBUG_ERROR, "Fail to select: %s\n", strerror(errno));
+                printf("Fail to select: %s\n");
                 exit(EXIT_FAILURE);
             }
             if (0 == r) //2秒都没有一帧数据-->超时处理
             {
                 // DEBUG_PRINT(DEBUG_INFO, "select Timeout!\n");
+                printf("select Timeout!\n");
                 exit(-1);
             }
             if (read_frame(fd))   //读取一帧数据并生成一张图片

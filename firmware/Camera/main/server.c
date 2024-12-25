@@ -10,6 +10,7 @@
 
 #include "server.h"
 
+FrameQueue g_queue;
 
 SERVER_CONTENT g_server_content; /* server global state */
 
@@ -259,16 +260,18 @@ const char *config_options[] = {
 
 int main(int argc, char ** argv) 
 {
-
+	// 初始化队列
+    init_queue(&g_queue,10);
+	
 	bool record_thread_alive = false;
 	bool rtsp_thread_alive = false;
 
-	if (! t_create_record_thread())
+	if (! t_create_record_thread(&g_queue))
 		goto quit;
 	else
 		record_thread_alive = true;
 
-	if (! t_create_rtsp_thread())
+	if (! t_create_rtsp_thread(&g_queue))
 		goto quit;
 	else
 		rtsp_thread_alive = true;
@@ -287,6 +290,7 @@ int main(int argc, char ** argv)
 			break;
 		}
 
+		//usleep(500000);
 		usleep(500000);
 	}
 	printf("Camera Quiting ...\n");

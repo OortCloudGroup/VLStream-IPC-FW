@@ -2,8 +2,9 @@
 #define _T_RTSP_SERVER_H_
 
 extern THREAD_CONTEXT g_rtsp_thread_context;
+extern FrameQueue g_queue;
 
-bool t_create_rtsp_thread();
+bool t_create_rtsp_thread(FrameQueue* queue);
 
 #define t_end_rtsp_thread() end_thread(g_rtsp_thread_context)
 

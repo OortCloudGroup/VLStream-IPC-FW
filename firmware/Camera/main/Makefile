@@ -19,7 +19,7 @@ EXTRALIB += -lssl -lcrypto
 endif
 
 #------------------------------------------------- 
-OBJS = server.o server_cron.o t_dict.o option.o networking.o t_record.o fbmap.o t_rtsp_server.o rtsp_server.o h264encoder.o
+OBJS = server.o server_cron.o t_dict.o option.o networking.o t_record.o fbmap.o t_rtsp_server.o rtsp_server.o h264encoder.o queue.o
 #-------------------------------------------------
 TARGET = server
 #-------------------------------------------------

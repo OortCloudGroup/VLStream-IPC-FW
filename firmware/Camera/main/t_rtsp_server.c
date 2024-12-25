@@ -10,12 +10,13 @@
 THREAD_CONTEXT g_rtsp_thread_context;
 static void * rtsp_thread_function(void * arg);
 
-bool t_create_rtsp_thread()
+bool t_create_rtsp_thread(FrameQueue* queue)
 {
 	bool ret;
 	g_rtsp_thread_context.alive_threshold = RTSP_THREAD_ALIVE_THRESHOLD;
 	g_rtsp_thread_context.handler = rtsp_thread_function;
 	g_rtsp_thread_context.priority = RTSP_THREAD_PRIORITY;
+	g_rtsp_thread_context.queue = queue;
 	if (! (ret = create_thread(&g_rtsp_thread_context)))
 		printf("%s: failed\n", __func__);
 	

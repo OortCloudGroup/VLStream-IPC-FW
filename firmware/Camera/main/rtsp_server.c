@@ -16,6 +16,9 @@
 #include "pthread.h"
 #include "../librtsp/include/net.h"
 #include "rtsp_server.h"
+#include "queue.h"
+
+extern FrameQueue g_queue;
 
 #define H264_FILENAME  "test.h264"
 #define SOCKET_ERROR    (-1)
@@ -82,19 +85,21 @@ void *rtp_thread(void *args)
         printf("udp server init fail.\n");
         return NULL;
     }
-    char *filename = H264_FILENAME;
-    file_t file;
+    // char *filename = H264_FILENAME;
+    // file_t file;
     uint32_t rtptime = 0;
     int idr = 0;
     rtp_header_t header;
     rtp_header_init(&header);
     header.seq = 0;
     header.ts = 0;
-    open_h264_file(filename, &file);
-    h264_nalu_t *nalu = h264_nal_packet_malloc(file.data, file.len);
+    //open_h264_file(filename, &file);
+    //h264_nalu_t *nalu = h264_nal_packet_malloc(file.data, file.len);
     printf("rtp server init.\n");
     while(g_pause){
-        h264_nalu_t *h264_nal = nalu;
+        //h264_nalu_t *h264_nal = nalu;
+        Frame frame = dequeue(&g_queue);
+        h264_nalu_t *h264_nal = h264_nal_packet_malloc((unsigned char*)frame.data, (int)frame.size);
         while(h264_nal && g_pause){
             if(h264_nal->type == H264_NAL_IDR || h264_nal->type == H264_NAL_PFRAME){
                 if(rtptime == 0){
@@ -125,8 +130,8 @@ void *rtp_thread(void *args)
             h264_nal = h264_nal->next;
         }
     }
-    h264_nal_packet_free(nalu);
-    close_h264_file(&file);
+    //h264_nal_packet_free(nalu);
+    // close_h264_file(&file);
     udp_server_deinit(&udp);
     udp_server_deinit(&rtcp);
     printf("rtp exit\n");
