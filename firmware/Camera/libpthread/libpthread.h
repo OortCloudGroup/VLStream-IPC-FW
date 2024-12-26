@@ -60,7 +60,6 @@ typedef struct tagThreadContext
 	bool quited;
 	pthread_t thread;
 	void * (* handler)(void * arg);
-	FrameQueue* queue;
 } THREAD_CONTEXT;
 
 bool create_thread(THREAD_CONTEXT * c);

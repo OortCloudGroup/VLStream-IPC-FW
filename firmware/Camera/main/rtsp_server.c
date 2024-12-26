@@ -73,18 +73,81 @@ void close_h264_file(file_t *file)
     
 }
 
+// 获取一个空闲的端口
+int get_free_port() {
+    int sockfd;
+    struct sockaddr_in addr;
+    
+    // 创建一个UDP套接字
+    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (sockfd < 0) {
+        perror("socket");
+        return -1;
+    }
+
+    // 设置端口为0，操作系统会选择一个空闲端口
+    memset(&addr, 0, sizeof(addr));
+    addr.sin_family = AF_INET;
+    addr.sin_addr.s_addr = INADDR_ANY;  // 使用本地IP
+    addr.sin_port = 0;  // 端口号为0，操作系统自动选择空闲端口
+
+    // 绑定套接字到指定端口（此时端口为0）
+    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
+        perror("bind");
+        close(sockfd);
+        return -1;
+    }
+
+    // 获取操作系统分配的端口
+    socklen_t addr_len = sizeof(addr);
+    if (getsockname(sockfd, (struct sockaddr *)&addr, &addr_len) == -1) {
+        perror("getsockname");
+        close(sockfd);
+        return -1;
+    }
+
+    // 关闭套接字
+    close(sockfd);
+    
+    // 返回分配的端口号
+    return ntohs(addr.sin_port);
+}
+
 void *rtp_thread(void *args)
 {
     ip_t* ipaddr = &ip;
     udp_t udp,rtcp;
-    if(udp_server_init(&udp, 45504)){
-        printf("udp server init fail.\n");
+    // if(udp_server_init(&udp, 45504)){
+    //     printf("udp server init fail. udp\n");
+    //     return NULL;
+    // }
+    // if(udp_server_init(&rtcp, 45505)){
+    //     printf("udp server init fail. rtcp\n");
+    //     return NULL;
+    // }
+
+    int udp_port = get_free_port();
+    if (udp_port == -1) {
+        printf("Failed to get a free UDP port.\n");
         return NULL;
     }
-    if(udp_server_init(&rtcp, 45505)){
-        printf("udp server init fail.\n");
+
+    if (udp_server_init(&udp, udp_port)) {
+        printf("udp server init fail. udp\n");
         return NULL;
     }
+
+    int rtcp_port = get_free_port();
+    if (rtcp_port == -1) {
+        printf("Failed to get a free RTCP port.\n");
+        return NULL;
+    }
+
+    if (udp_server_init(&rtcp, rtcp_port)) {
+        printf("udp server init fail. rtcp\n");
+        return NULL;
+    }
+
     // char *filename = H264_FILENAME;
     // file_t file;
     uint32_t rtptime = 0;

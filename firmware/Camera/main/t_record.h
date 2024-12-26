@@ -4,9 +4,9 @@
 #include "queue.h"
 
 extern THREAD_CONTEXT g_record_thread_context;
-extern FrameQueue g_queue;
+//extern FrameQueue g_queue;
 
-bool t_create_record_thread(FrameQueue* queue);
+bool t_create_record_thread();
 
 #define t_end_record_thread() end_thread(g_record_thread_context)
 

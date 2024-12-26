@@ -266,12 +266,12 @@ int main(int argc, char ** argv)
 	bool record_thread_alive = false;
 	bool rtsp_thread_alive = false;
 
-	if (! t_create_record_thread(&g_queue))
+	if (! t_create_record_thread())
 		goto quit;
 	else
 		record_thread_alive = true;
 
-	if (! t_create_rtsp_thread(&g_queue))
+	if (! t_create_rtsp_thread())
 		goto quit;
 	else
 		rtsp_thread_alive = true;

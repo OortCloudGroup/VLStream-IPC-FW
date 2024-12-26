@@ -22,13 +22,12 @@ extern FrameQueue g_queue;  // 引用全局队列
 THREAD_CONTEXT g_record_thread_context;
 static void * record_thread_function(void * arg);
 
-bool t_create_record_thread(FrameQueue* queue)
+bool t_create_record_thread()
 {
 	bool ret;
 	g_record_thread_context.alive_threshold = RECORD_THREAD_ALIVE_THRESHOLD;
 	g_record_thread_context.handler = record_thread_function;
 	g_record_thread_context.priority = RECORD_THREAD_PRIORITY;
-    g_record_thread_context.queue = queue;
 	if (! (ret = create_thread(&g_record_thread_context)))
 		printf("%s: failed\n", __func__);
 	
@@ -54,7 +53,7 @@ static unsigned int n_buffer = 0;
 //h264
 Encoder en;
 FILE *h264_fp;
-char h264_file_name[20] = "./test.h264";
+//char h264_file_name[20] = "./test.h264";
 char *h264_buf;
 
 void init_encoder(int width, int height)
@@ -63,10 +62,10 @@ void init_encoder(int width, int height)
     h264_buf = (char *)malloc(width * height * 2);
 }
 
-void init_file()
-{
-    h264_fp = fopen(h264_file_name, "wa+");
-}
+// void init_file()
+// {
+//     h264_fp = fopen(h264_file_name, "wa+");
+// }
 
 void close_encoder()
 {
@@ -239,7 +238,7 @@ int init_camera(int fd)
     }
     init_mmap(fd); //重点和难点（内存映射）
     init_encoder(WIDTH, HIGHT);  //初始化编码器
-    init_file();                 //初始化输出文件
+    //init_file();                 //初始化输出文件
     return 0;
 }
 
