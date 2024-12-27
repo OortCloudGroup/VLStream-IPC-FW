@@ -13,363 +13,180 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <errno.h>
+#include <signal.h>
+
 #include "pthread.h"
 #include "../librtsp/include/net.h"
 #include "rtsp_server.h"
-#include "queue.h"
+#include "rtsp_demo.h"
+#include "queueFrame.h"
 
 extern FrameQueue g_queue;
 
-#define H264_FILENAME  "test.h264"
-#define SOCKET_ERROR    (-1)
-#define INVALID_SOCKET  (-1)
-#define BUF_SIZE 2048
-typedef struct {
-    unsigned char *data;
-    int len;
-} file_t;
-pthread_t rtp;
-int g_pause = 0;
-ip_t ip;
-const char* rfc822_datetime_format(time_t time, char* datetime)
+#define MAX_SESSION_NUM 64
+
+//FILE *fp[MAX_SESSION_NUM][2] = {{NULL}};
+rtsp_demo_handle demo;
+rtsp_session_handle session[MAX_SESSION_NUM] = {NULL};
+int session_count = 0;
+// uint8_t *vbuf = NULL;
+// uint8_t *abuf = NULL;
+
+uint64_t ts = 0;
+int vsize = 0, asize = 0;
+int ret, ch;
+
+static int flag_run = 1;
+static void sig_proc(int signo)
 {
-	int r;
-	char *date = asctime(gmtime(&time));
-	char mon[8], week[8];
-	int year, day, hour, min, sec;
-	sscanf(date, "%s %s %d %d:%d:%d %d",week, mon, &day, &hour, &min, &sec, &year);
-	r = snprintf(datetime, 32, "%s, %02d %s %04d %02d:%02d:%02d GMT",
-		week,day,mon,year,hour,min,sec);
-	return r > 0 && r < 32 ? datetime : NULL;
-}
-uint32_t rtsp_get_reltime (void)
-{
-	struct timespec tp;
-    uint64_t ts;
-	clock_gettime(CLOCK_MONOTONIC, &tp);
-    ts = (tp.tv_sec * 1000000+ tp.tv_nsec / 1000);
-    //printf("usec:%d\n",ts);
-	return ts;
+	flag_run = 0;
 }
 
-int open_h264_file(char *filename, file_t * file)
-{
-    struct stat info;
-    stat(filename, &info);
-    FILE *fp=fopen(filename, "rb");
-    file->data = (unsigned char *)malloc(info.st_size);
-    memset(file->data, 0, info.st_size);
-    fread(file->data, 1, info.st_size, fp);
-    file->len = info.st_size;
-    fclose(fp);
-    return 0;
-}
-void close_h264_file(file_t *file)
-{
-    if(file->data){
-        free(file->data);
-        file->data = NULL;
-    }
-    
-}
-
-// 获取一个空闲的端口
-int get_free_port() {
-    int sockfd;
-    struct sockaddr_in addr;
-    
-    // 创建一个UDP套接字
-    sockfd = socket(AF_INET, SOCK_DGRAM, 0);
-    if (sockfd < 0) {
-        perror("socket");
-        return -1;
-    }
-
-    // 设置端口为0，操作系统会选择一个空闲端口
-    memset(&addr, 0, sizeof(addr));
-    addr.sin_family = AF_INET;
-    addr.sin_addr.s_addr = INADDR_ANY;  // 使用本地IP
-    addr.sin_port = 0;  // 端口号为0，操作系统自动选择空闲端口
-
-    // 绑定套接字到指定端口（此时端口为0）
-    if (bind(sockfd, (struct sockaddr *)&addr, sizeof(addr)) < 0) {
-        perror("bind");
-        close(sockfd);
-        return -1;
-    }
-
-    // 获取操作系统分配的端口
-    socklen_t addr_len = sizeof(addr);
-    if (getsockname(sockfd, (struct sockaddr *)&addr, &addr_len) == -1) {
-        perror("getsockname");
-        close(sockfd);
-        return -1;
-    }
-
-    // 关闭套接字
-    close(sockfd);
-    
-    // 返回分配的端口号
-    return ntohs(addr.sin_port);
-}
-
-void *rtp_thread(void *args)
-{
-    ip_t* ipaddr = &ip;
-    udp_t udp,rtcp;
-    // if(udp_server_init(&udp, 45504)){
-    //     printf("udp server init fail. udp\n");
-    //     return NULL;
-    // }
-    // if(udp_server_init(&rtcp, 45505)){
-    //     printf("udp server init fail. rtcp\n");
-    //     return NULL;
-    // }
-
-    int udp_port = get_free_port();
-    if (udp_port == -1) {
-        printf("Failed to get a free UDP port.\n");
-        return NULL;
-    }
-
-    if (udp_server_init(&udp, udp_port)) {
-        printf("udp server init fail. udp\n");
-        return NULL;
-    }
-
-    int rtcp_port = get_free_port();
-    if (rtcp_port == -1) {
-        printf("Failed to get a free RTCP port.\n");
-        return NULL;
-    }
-
-    if (udp_server_init(&rtcp, rtcp_port)) {
-        printf("udp server init fail. rtcp\n");
-        return NULL;
-    }
-
-    // char *filename = H264_FILENAME;
-    // file_t file;
-    uint32_t rtptime = 0;
-    int idr = 0;
-    rtp_header_t header;
-    rtp_header_init(&header);
-    header.seq = 0;
-    header.ts = 0;
-    //open_h264_file(filename, &file);
-    //h264_nalu_t *nalu = h264_nal_packet_malloc(file.data, file.len);
-    printf("rtp server init.\n");
-    while(g_pause){
-        //h264_nalu_t *h264_nal = nalu;
-        Frame frame = dequeue(&g_queue);
-        h264_nalu_t *h264_nal = h264_nal_packet_malloc((unsigned char*)frame.data, (int)frame.size);
-        while(h264_nal && g_pause){
-            if(h264_nal->type == H264_NAL_IDR || h264_nal->type == H264_NAL_PFRAME){
-                if(rtptime == 0){
-                    rtptime = rtsp_get_reltime();
-                }
-                else {
-                    while((rtptime + 40000) > rtsp_get_reltime()){
-                        usleep(100);
-                    }
-                    //printf("sleep:%d us\n", rtsp_get_reltime() - rtptime);
-                    rtptime = rtsp_get_reltime();
-
-                }
-                idr = 1;
-                rtp_packet_t* rtp_ptk = rtp_packet_malloc(&header, h264_nal->data, h264_nal->len);
-                rtp_packet_t* cur = rtp_ptk;
-                while(cur){
-                    udp_server_send_msg(&udp, ipaddr->ip, ipaddr->port, (unsigned char*)cur->data, cur->len);
-                    cur = cur->next;
-                }
-                rtp_packet_free(rtp_ptk);
-            }
-            else if((h264_nal->type  == H264_NAL_SPS || h264_nal->type == H264_NAL_PPS) && !idr){
-                rtp_packet_t* cur = rtp_packet_malloc(&header, h264_nal->data, h264_nal->len);
-                udp_server_send_msg(&udp, ipaddr->ip, ipaddr->port, (unsigned char*)cur->data, cur->len);
-                rtp_packet_free(cur);
-            }
-            h264_nal = h264_nal->next;
-        }
-    }
-    //h264_nal_packet_free(nalu);
-    // close_h264_file(&file);
-    udp_server_deinit(&udp);
-    udp_server_deinit(&rtcp);
-    printf("rtp exit\n");
-}
-extern const char* rfc822_datetime_format(time_t time, char* datetime);
-void* rtsp_thread(void *args)
-{
-    ip_t * ipaddr = (ip_t *)args;
-    tcp_t tcp;
-    int client = 0;
-    if(tcp_server_init(&tcp, 8554)){
-        printf("tcp server init fail.\n");
-        return NULL;
-    }
-
-    char msg[2048];
-    char sdp[2048]="v=0\n"
-              "o=- 16409863082207520751 16409863082207520751 IN IP4 0.0.0.0\n"
-              "c=IN IP4 0.0.0.0\n"
-              "t=0 0\n"
-              "a=range:npt=0-1.4\n"
-              "a=recvonly\n"
-              "m=video 0 RTP/AVP 97\n"
-              "a=rtpmap:97 H264/90000\n"
-              ;
-    while(1){
-        if(client == 0){
-            fd_set fds;
-            struct timeval tv;
-            int r;
-
-            FD_ZERO(&fds);
-            FD_SET(tcp.sock,&fds);
-            tv.tv_sec = 2;
-            tv.tv_usec = 0;
-            r = select(tcp.sock + 1,&fds,NULL,NULL,&tv);
-            if(-1 == r || 0 == r)
-            {
-                continue;
-            }
-            client  = tcp_server_wait_client(&tcp);
-            sprintf(ipaddr->ip, "%s", inet_ntoa(tcp.addr.sin_addr) ); 
-            ipaddr->port = ntohs(tcp.addr.sin_port);
-            printf("rtsp client ip:%s port:%d\n", inet_ntoa(tcp.addr.sin_addr), ntohs(tcp.addr.sin_port));
-        }
-        char recvbuffer[2048];
-        tcp_server_receive_msg(&tcp, client, recvbuffer, sizeof(recvbuffer));
-        rtsp_msg_t rtsp = rtsp_msg_load(recvbuffer);
-        char datetime[30];
-	    rfc822_datetime_format(time(NULL), datetime);
-        rtsp_rely_t rely = get_rely(rtsp);
-        memcpy(rely.datetime, datetime, strlen(datetime));
-        switch(rtsp.request.method){
-        case SETUP:
-            rely.tansport.server_port=45504;
-            rtsp_rely_dumps(rely, msg, 2048);
-            sprintf(ip.ip, "%s", ipaddr->ip);
-            ip.port = rtsp.tansport.client_port;
-            g_pause = 1;
-            pthread_create(&rtp,NULL,rtp_thread,&ip);
-            printf("rtp client ip:%s port:%d\n",ip.ip, ip.port);
-            break;
-        case DESCRIBE:
-            rely.sdp_len = strlen(sdp);
-            memcpy(rely.sdp, sdp, rely.sdp_len);
-            rtsp_rely_dumps(rely, msg, 2048);
-            break;
-        case TEARDOWN:
-            rtsp_rely_dumps(rely, msg, 2048);
-            tcp_server_send_msg(&tcp, client, msg, strlen(msg));
-            tcp_server_close_client(&tcp, client);
-            client = 0;
-            g_pause = 0;
-            continue;
-        default:
-            rtsp_rely_dumps(rely, msg, 2048);
-            break;
-        }
-        tcp_server_send_msg(&tcp, client, msg, strlen(msg));
-        usleep(1000);
-    }
-    tcp_server_deinit(&tcp);
-}
 
 ip_t * ipaddr;
 tcp_t tcp;
 int client;
 
-// char msg[2048];
-// char sdp[2048];
-
-char msg[2048];
-char sdp[2048]="v=0\n"
-              "o=- 16409863082207520751 16409863082207520751 IN IP4 0.0.0.0\n"
-              "c=IN IP4 0.0.0.0\n"
-              "t=0 0\n"
-              "a=range:npt=0-1.4\n"
-              "a=recvonly\n"
-              "m=video 0 RTP/AVP 97\n"
-              "a=rtpmap:97 H264/90000\n";
-
 int c_init_rtsp()
 {
-    ipaddr = &ip; //(ip_t *)args
-    client = 0;
-    if(tcp_server_init(&tcp, 8554)){
-        printf("tcp server init fail.\n");
+    demo = rtsp_new_demo(8554);
+	if (NULL == demo) {
+		printf("rtsp_new_demo failed\n");
+		return -1;
+	}
+
+
+    // session[ch] = rtsp_new_session(demo, cfg.session_cfg[ch].path);
+    // if (NULL == session[ch]) {
+    //     printf("rtsp_new_session failed\n");
+    //     continue;
+    // }
+
+    //rtsp_set_auth(session[ch], RTSP_AUTH_TYPE_BASIC, "admin", "123456");
+    session[0] = rtsp_new_session(demo, "/live/video");
+    if (NULL == session[0]) {
+        printf("rtsp_new_session failed\n");
         return -1;
     }
+    rtsp_set_video(session[0], RTSP_CODEC_ID_VIDEO_H264, NULL, 0);
+    rtsp_sync_video_ts(session[0], rtsp_get_reltime(), rtsp_get_ntptime());
+    
+    // if (fp[ch][1]) {
+    //     rtsp_set_audio(session[ch], RTSP_CODEC_ID_AUDIO_G711A, NULL, 0);
+    //     rtsp_sync_audio_ts(session[ch], rtsp_get_reltime(), rtsp_get_ntptime());
+    // }
+
+    // printf("==========> rtsp://127.0.0.1:8554%s for %s %s <===========\n", cfg.session_cfg[ch].path, 
+    //     fp[ch][0] ? cfg.session_cfg[ch].video_file : "", 
+    //     fp[ch][1] ? cfg.session_cfg[ch].audio_file : "");
+
+
+	ts = rtsp_get_reltime();
+	signal(SIGINT, sig_proc);
+#ifdef __linux__
+	signal(SIGPIPE, SIG_IGN);
+#else
+    
+#endif
 
     return 0;
 }
 
-void c_do_rtsp_handler()
+int c_do_rtsp_handler()
 {
-    if(client == 0)
+    if (flag_run) 
     {
-        fd_set fds;
-        struct timeval tv;
-        int r;
+	    uint8_t type = 0;
 
-        FD_ZERO(&fds);
-        FD_SET(tcp.sock,&fds);
-        tv.tv_sec = 2;
-        tv.tv_usec = 0;
-        r = select(tcp.sock + 1,&fds,NULL,NULL,&tv);
-        if(-1 == r || 0 == r)
-        {
-            return;
+        Frame frame = dequeue(&g_queue);
+        if(frame.data && frame.size > 0){
+            //printf("当前时间: %ld",ts);
+            rtsp_tx_video(session[0], frame.data, frame.size, ts);
         }
-        client  = tcp_server_wait_client(&tcp);
-        sprintf(ipaddr->ip, "%s", inet_ntoa(tcp.addr.sin_addr) ); 
-        ipaddr->port = ntohs(tcp.addr.sin_port);
-        printf("rtsp client ip:%s port:%d\n", inet_ntoa(tcp.addr.sin_addr), ntohs(tcp.addr.sin_port));
+		// for (ch = 0; ch < session_count; ch++) {
+		// 	if (fp[ch][0]) {
+		// 	read_video_again:
+		// 		ret = get_next_video_frame(fp[ch][0], &vbuf, &vsize);
+		// 		if (ret < 0) {
+		// 			fprintf(stderr, "get_next_video_frame failed\n");
+		// 			flag_run = 0;
+		// 			break;
+		// 		}
+		// 		if (ret == 0) {
+		// 			fseek(fp[ch][0], 0, SEEK_SET);
+		// 			if (fp[ch][1])
+		// 				fseek(fp[ch][1], 0, SEEK_SET);
+		// 			goto read_video_again;
+		// 		}
+
+		// 		if (session[ch])
+		// 			rtsp_tx_video(session[ch], vbuf, vsize, ts);
+
+		// 		type = 0;
+		// 		if (vbuf[0] == 0 && vbuf[1] == 0 && vbuf[2] == 1) {
+		// 			type = vbuf[3] & 0x1f;
+		// 		}
+		// 		if (vbuf[0] == 0 && vbuf[1] == 0 && vbuf[2] == 0 && vbuf[3] == 1) {
+		// 			type = vbuf[4] & 0x1f;
+		// 		}
+		// 		if (type != 5 && type != 1)
+		// 			goto read_video_again;
+		// 	}
+
+		// 	if (fp[ch][1]) {
+		// 		ret = get_next_audio_frame(fp[ch][1], &abuf, &asize);
+		// 		if (ret < 0) {
+		// 			fprintf(stderr, "get_next_audio_frame failed\n");
+		// 			break;
+		// 		}
+		// 		if (ret == 0) {
+		// 			fseek(fp[ch][1], 0, SEEK_SET);
+		// 			if (fp[ch][0])
+		// 				fseek(fp[ch][0], 0, SEEK_SET);
+		// 			continue;
+		// 		}
+		// 		if (session[ch])
+		// 			rtsp_tx_audio(session[ch], abuf, asize, ts);
+		// 	}
+		// }
+
+		do {
+			ret = rtsp_do_event(demo);
+			if (ret > 0)
+				continue;
+			if (ret < 0)
+				return 1;
+			usleep(20000);
+		} while (rtsp_get_reltime() - ts < 1000000 / 25);
+		if (ret < 0)
+			return 1;
+		ts += 1000000 / 25;
+		printf(".");fflush(stdout);
+	}else
+    {
+        return 0;
     }
-    char recvbuffer[2048];
-    tcp_server_receive_msg(&tcp, client, recvbuffer, sizeof(recvbuffer));
-    rtsp_msg_t rtsp = rtsp_msg_load(recvbuffer);
-    char datetime[30];
-    rfc822_datetime_format(time(NULL), datetime);
-    rtsp_rely_t rely = get_rely(rtsp);
-    memcpy(rely.datetime, datetime, strlen(datetime));
-    switch(rtsp.request.method){
-    case SETUP:
-        rely.tansport.server_port=45504;
-        rtsp_rely_dumps(rely, msg, 2048);
-        sprintf(ip.ip, "%s", ipaddr->ip);
-        ip.port = rtsp.tansport.client_port;
-        g_pause = 1;
-        pthread_create(&rtp,NULL,rtp_thread,&ip);
-        printf("rtp client ip:%s port:%d\n",ip.ip, ip.port);
-        break;
-    case DESCRIBE:
-        rely.sdp_len = strlen(sdp);
-        memcpy(rely.sdp, sdp, rely.sdp_len);
-        rtsp_rely_dumps(rely, msg, 2048);
-        break;
-    case TEARDOWN:
-        rtsp_rely_dumps(rely, msg, 2048);
-        tcp_server_send_msg(&tcp, client, msg, strlen(msg));
-        tcp_server_close_client(&tcp, client);
-        client = 0;
-        g_pause = 0;
-        return;
-    default:
-        rtsp_rely_dumps(rely, msg, 2048);
-        break;
-    }
-    tcp_server_send_msg(&tcp, client, msg, strlen(msg));
-    usleep(1000);
+
+    return 1;
+
 }
 
 void c_deinit_rtsp()
 {
-    tcp_server_deinit(&tcp);
+    //free(vbuf);
+	//free(abuf);
+	
+	// for (ch = 0; ch < session_count; ch++) {
+	// 	if (fp[ch][0])
+	// 		fclose(fp[ch][0]);
+	// 	if (fp[ch][1])
+	// 		fclose(fp[ch][1]);
+	// 	if (session[ch])
+	// 		rtsp_del_session(session[ch]);
+	// }
+    signal(SIGINT, sig_proc);
+    rtsp_del_session(session[0]);
+	rtsp_del_demo(demo);
 }
 
 // void main()

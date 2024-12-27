@@ -8,6 +8,6 @@
 
 int c_init_rtsp();
 
-void c_do_rtsp_handler();
+int c_do_rtsp_handler();
 void c_deinit_rtsp();
 #endif

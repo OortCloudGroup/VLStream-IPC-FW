@@ -46,7 +46,7 @@ extern "C"{
 
 #include <linux/tcp.h>
 #include "tcp_lib_types.h"
-#include "../main/queue.h"
+#include "../main/queueFrame.h"
 
 #define MIN_PRIORITY 0
 #define MAX_PRIORITY 5

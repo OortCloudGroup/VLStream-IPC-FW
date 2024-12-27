@@ -2,7 +2,16 @@
 #include "../libutility/libutility.h"
 
 #include "t_rtsp_server.h"
-#include "rtsp_server.h"
+//#include "rtsp_server.h"
+#include "rtsp_demo.h"
+
+#ifdef __linux__
+#include <unistd.h>
+#endif
+#ifdef __WIN32__
+#include <windows.h>
+#define usleep(x) Sleep((x)/1000)
+#endif
 
 #define RTSP_THREAD_ALIVE_THRESHOLD				(60 * 100)
 #define RTSP_THREAD_PRIORITY						4
@@ -25,7 +34,6 @@ bool t_create_rtsp_thread()
 static void * rtsp_thread_function(void * arg)
 {
 	THREAD_CONTEXT * c = (THREAD_CONTEXT *)arg;
-
 	if (c_init_rtsp() != 0)
 	{
 		printf("%s: reboot\n", __func__);
@@ -33,7 +41,7 @@ static void * rtsp_thread_function(void * arg)
 		return NULL;
 	}
 	
-	while (1)
+	while (! c->exit)
 	{
 		c->tick = get_tickcount();
 		
@@ -43,7 +51,11 @@ static void * rtsp_thread_function(void * arg)
 		// 		break;
 		// }
 
-		c_do_rtsp_handler();
+		if(c_do_rtsp_handler() == 0)
+		{
+			err("c_do_rtsp_handler stop");
+			break;	
+		}
 	}
 	
 	c_deinit_rtsp();

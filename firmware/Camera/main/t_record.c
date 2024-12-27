@@ -38,8 +38,10 @@ bool t_create_record_thread()
 #define ERROR -1
 // #define JPG "./out/image%d"
 #define JPG "./out/image%d.jpg"
-#define WIDTH 640
-#define HIGHT 480
+// #define WIDTH 640
+// #define HIGHT 480
+#define WIDTH 1280
+#define HIGHT 720
 //#define COUNT 2000
 
 typedef struct
@@ -226,8 +228,8 @@ int init_camera(int fd)
     printf("\n");
     /*set the form of camera capture data*/
     tv_fmt.type = V4L2_BUF_TYPE_VIDEO_CAPTURE; /*v4l2_buf_typea,camera must use V4L2_BUF_TYPE_VIDEO_CAPTURE*/
-    tv_fmt.fmt.pix.width = 640;
-    tv_fmt.fmt.pix.height = 480;
+    tv_fmt.fmt.pix.width = WIDTH; // 640
+    tv_fmt.fmt.pix.height = HIGHT;//480
     tv_fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; /*V4L2_PIX_FMT_YYUV*/ //V4L2_PIX_FMT_YUYV //V4L2_PIX_FMT_MJPEG
     tv_fmt.fmt.pix.field = V4L2_FIELD_NONE;           /*V4L2_FIELD_NONE*/
     if (ioctl(fd, VIDIOC_S_FMT, &tv_fmt) < 0)         //设置设备工作格式
