@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "server.h": "c",
-        "unistd.h": "c",
-        "rtsp_parse.h": "c",
-        "rtp.h": "c"
-    }
-}

@@ -1,8 +1,0 @@
-{
-    "files.associations": {
-        "libpthread.h": "c",
-        "libutility.h": "c",
-        "server.h": "c",
-        "t_record.h": "c"
-    }
-}
