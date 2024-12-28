@@ -260,7 +260,7 @@ const char *config_options[] = {
 
 int main(int argc, char ** argv) 
 {
-	// 初始化队列
+	// Initialize queue
     init_queue(&g_queue,10);
 	
 	bool record_thread_alive = false;

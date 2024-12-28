@@ -10,11 +10,10 @@
 #include "../include/x264.h"
 #include "../include/x264_config.h"
 #include "t_record.h"
-#include "fbmap.h"
 #include "h264encoder.h"
 
 
-extern FrameQueue g_queue;  // 引用全局队列
+extern FrameQueue g_queue;  // Reference global queue
 
 #define RECORD_THREAD_ALIVE_THRESHOLD				(10 * 60 * 100)
 #define RECORD_THREAD_PRIORITY						3
@@ -40,8 +39,8 @@ bool t_create_record_thread()
 #define JPG "./out/image%d.jpg"
 // #define WIDTH 640
 // #define HIGHT 480
-#define WIDTH 1280
-#define HIGHT 720
+#define WIDTH 640
+#define HIGHT 480
 //#define COUNT 2000
 
 typedef struct
@@ -84,37 +83,13 @@ void encode_frame(uint8_t *yuv_frame, size_t yuv_length)
 {
     int h264_length = 0;
     static int count = 0;
-    
-    // clock_t start, end;
-    // double cpu_time_used;
-
-    // // 获取程序开始执行的时刻
-    // start = clock();
 
     h264_length = compress_frame(&en, -1, yuv_frame, h264_buf);
-    //     // 获取程序执行完的时刻
-    // end = clock();
-
-    // 计算程序运行的时间（秒）
-    // cpu_time_used = ((double)(end - start)) / CLOCKS_PER_SEC;
-
-    // printf("程序执行时间: %f 秒\n", cpu_time_used);
 
     if (h264_length > 0)
     {
-        // 直接通过上下文获取队列
+        // Send data to the queue
         enqueue(&g_queue, h264_buf, h264_length);
-        // if (fwrite(h264_buf, h264_length, 1, h264_fp) > 0)
-        // {
-        //     // 直接通过上下文获取队列
-        //     enqueue(&g_queue, h264_buf, h264_length);
-        //     printf("encode_frame num = %d\n",count++);
-           
-        // }
-        // else
-        // {
-        //     perror("encode_frame fwrite err\n");
-        // }
     }
 }
 
@@ -122,7 +97,7 @@ int open_camera(char *Directory)
 {
     int fd;
     struct v4l2_input inp;
-    //打开摄像头设备，非阻塞方式
+    //Turn on the camera device, non-blocking way.
     fd = open(Directory, O_RDWR | O_NONBLOCK, 0);
     if(fd < 0)
     {
@@ -143,17 +118,19 @@ int init_mmap(int fd)
     /*to request frame cache, contain requested counts*/
     struct v4l2_requestbuffers reqbufs;
     memset(&reqbufs, 0, sizeof(reqbufs));
-    reqbufs.count = 4; /*the number of buffer*/     //缓冲区个数
+    reqbufs.count = 4; /*the number of buffer*/
     reqbufs.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     reqbufs.memory = V4L2_MEMORY_MMAP;
-    if (-1 == ioctl(fd, VIDIOC_REQBUFS, &reqbufs))  //申请缓冲区
+    //Application buffer
+    if (-1 == ioctl(fd, VIDIOC_REQBUFS, &reqbufs))
     {
         // DEBUG_PRINT(DEBUG_ERROR, "ioctl 'VIDIOC_REQBUFS'failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
     }
     n_buffer = reqbufs.count;
     printf("n_buffer = %d\n", n_buffer);
-    usr_buf = calloc(reqbufs.count, sizeof(BUFTYPE)); //申请地址user_buf(void *start;int length;共8byte)
+    //Application address user_buf(void *start;int length;共8byte)
+    usr_buf = calloc(reqbufs.count, sizeof(BUFTYPE)); 
     if (usr_buf == NULL)
     {
         // DEBUG_PRINT(DEBUG_ERROR, "Out of memory failed: %s\n", strerror(errno));
@@ -163,21 +140,21 @@ int init_mmap(int fd)
     for (n_buffer = 0; n_buffer < reqbufs.count; ++n_buffer)
     {
         //stand for a frame
-        struct v4l2_buffer buf;      //定义一帧数据buf
+        struct v4l2_buffer buf;      //Define a frame of data buf
         memset(&buf, 0, sizeof(buf));
         buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         buf.memory = V4L2_MEMORY_MMAP;
         buf.index = n_buffer; 
         /*check the information of the kernel cache requested*/
-        if (-1 == ioctl(fd, VIDIOC_QUERYBUF, &buf))    //获取数据帧地址和长度
+        if (-1 == ioctl(fd, VIDIOC_QUERYBUF, &buf))    //Obtain that address and length of the data frame
         {
             // DEBUG_PRINT(DEBUG_ERROR, "Fail to ioctl : VIDIOC_QUERYBUF %s\n", strerror(errno));
             exit(EXIT_FAILURE);
         }
-        usr_buf[n_buffer].length = buf.length;  //数据帧的长度
-        printf("usr_buf[n_buffer].length :%d\n", usr_buf[n_buffer].length);  //打印测试
-        usr_buf[n_buffer].start = (char *)mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset); //进程与设备数据帧地址关联起来
-        //之后就可以可以用进程的数据地址访问设备文件的数据
+        usr_buf[n_buffer].length = buf.length;  //Length of data frame
+        printf("usr_buf[n_buffer].length :%d\n", usr_buf[n_buffer].length);  //Print test
+        usr_buf[n_buffer].start = (char *)mmap(NULL, buf.length, PROT_READ | PROT_WRITE, MAP_SHARED, fd, buf.m.offset); //Processes are associated with device data frame addresses.
+        //Then you can access the data of the device file with the data address of the process.
         if (MAP_FAILED == usr_buf[n_buffer].start)
         {
             // DEBUG_PRINT(DEBUG_ERROR, "Fail to mmap:%s\n", strerror(errno));
@@ -199,7 +176,7 @@ int init_camera(int fd)
     fmtdesc.index = 0;
     fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     /* check video decive driver capability */
-    if (ret = ioctl(fd, VIDIOC_QUERYCAP, &cap) < 0)  //获取设备信息
+    if (ret = ioctl(fd, VIDIOC_QUERYCAP, &cap) < 0)  //Get device information
     {
         // DEBUG_PRINT(DEBUG_ERROR, "ioctl VIDEO_QUERYCAP failed: %s\n", strerror(errno));
         exit(EXIT_FAILURE);
@@ -220,7 +197,7 @@ int init_camera(int fd)
     printf("camera device name is : %s\n", cap.card);
     printf("camera bus information: %s\n", cap.bus_info);
     /*display the format device support*/
-    while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1)  //获取设备支持的所有格式
+    while (ioctl(fd, VIDIOC_ENUM_FMT, &fmtdesc) != -1)  //Get all formats supported by the device.
     {
         printf("support device %d.%s\n", fmtdesc.index + 1, fmtdesc.description);
         fmtdesc.index++;
@@ -232,15 +209,14 @@ int init_camera(int fd)
     tv_fmt.fmt.pix.height = HIGHT;//480
     tv_fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV; /*V4L2_PIX_FMT_YYUV*/ //V4L2_PIX_FMT_YUYV //V4L2_PIX_FMT_MJPEG
     tv_fmt.fmt.pix.field = V4L2_FIELD_NONE;           /*V4L2_FIELD_NONE*/
-    if (ioctl(fd, VIDIOC_S_FMT, &tv_fmt) < 0)         //设置设备工作格式
+    if (ioctl(fd, VIDIOC_S_FMT, &tv_fmt) < 0)         //Set the working format of the equipment
     {
         // DEBUG_PRINT(DEBUG_ERROR, "VIDIOC_S_FMT set err %s\n", strerror(errno));
         close(fd);
         exit(-1);
     }
-    init_mmap(fd); //重点和难点（内存映射）
-    init_encoder(WIDTH, HIGHT);  //初始化编码器
-    //init_file();                 //初始化输出文件
+    init_mmap(fd); //Key Points and Difficulties (Memory Mapping)
+    init_encoder(WIDTH, HIGHT);  //Initializing encoder
     return 0;
 }
 
@@ -263,7 +239,7 @@ int start_capture(int fd)
         }
     }
     type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-    if (-1 == ioctl(fd, VIDIOC_STREAMON, &type))  //启动采集数据
+    if (-1 == ioctl(fd, VIDIOC_STREAMON, &type))  //Start collecting data
     {
         printf("i=%d.\n", i);
         // DEBUG_PRINT(DEBUG_ERROR, "VIDIOC_STREAMON %s\n", strerror(errno));
@@ -292,11 +268,11 @@ int process_image(void *addr, int length)
 
 int read_frame(int fd)
 {
-    struct v4l2_buffer buf;  //定义一帧数据buf
+    struct v4l2_buffer buf;  //Define a frame of data buf
     memset(&buf, 0, sizeof(buf));
     buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
     buf.memory = V4L2_MEMORY_MMAP;
-    if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf))   //从缓冲区取出一帧数据
+    if (-1 == ioctl(fd, VIDIOC_DQBUF, &buf))   //Fetch a frame of data from the buffer.
     {
         perror("Fail to ioctl 'VIDIOC_DQBUF'");
         exit(EXIT_FAILURE);
@@ -312,41 +288,6 @@ int read_frame(int fd)
     }
     return 1;
 }
-
-// int mainloop(int fd)
-// {
-//     int count = COUNT;
-//     while (count-- > 0)
-//     {
-//         while(1)
-//         {
-//             fd_set fds;
-//             struct timeval tv;
-//             int r;
-//             FD_ZERO(&fds);
-//             FD_SET(fd, &fds);
-//             /*Timeout*/
-//             tv.tv_sec = 2;
-//             tv.tv_usec = 0;
-//             r = select(fd + 1, &fds, NULL, NULL, &tv);  //等到一帧数据到来
-//             if (-1 == r)
-//             {
-//                 if (EINTR == errno)
-//                     continue;
-//                 // DEBUG_PRINT(DEBUG_ERROR, "Fail to select: %s\n", strerror(errno));
-//                 exit(EXIT_FAILURE);
-//             }
-//             if (0 == r) //2秒都没有一帧数据-->超时处理
-//             {
-//                 // DEBUG_PRINT(DEBUG_INFO, "select Timeout!\n");
-//                 exit(-1);
-//             }
-//             if (read_frame(fd))   //读取一帧数据并生成一张图片
-//                 break;
-//         }
-//     }
-//     return 0;
-// }
 
 void stop_capture(int fd)
 {
@@ -393,26 +334,21 @@ static void * record_thread_function(void * arg)
 		//c_reboot();
 		return NULL;
 	}
-    //设置摄像头参数
+    //Set camera parameters
     if(init_camera(fd) != 0)
     {
         printf("%s: reboot\n", __func__);
 		//c_reboot();
 		return NULL;
     };
-    //启动摄像头数据流
+    //Start the camera data stream
     if(start_capture(fd) != 0)
     {
         printf("%s: reboot\n", __func__);
 		//c_reboot();
 		return NULL;
     };
-    //读取数据
-	// while (! c->exit)//
-	// {
-    //     c->tick = get_tickcount();
-
-	// }
+    //Read data
     while (! c->exit)
     {
         c->tick = get_tickcount();
@@ -426,7 +362,7 @@ static void * record_thread_function(void * arg)
             /*Timeout*/
             tv.tv_sec = 2;
             tv.tv_usec = 0;
-            r = select(fd + 1, &fds, NULL, NULL, &tv);  //等到一帧数据到来
+            r = select(fd + 1, &fds, NULL, NULL, &tv);  //Wait until a frame of data arrives.
             if (-1 == r)
             {
                 if (EINTR == errno)
@@ -435,18 +371,18 @@ static void * record_thread_function(void * arg)
                 printf("Fail to select: %s\n");
                 exit(EXIT_FAILURE);
             }
-            if (0 == r) //2秒都没有一帧数据-->超时处理
+            if (0 == r) //2 seconds without a frame of data-> timeout processing
             {
                 // DEBUG_PRINT(DEBUG_INFO, "select Timeout!\n");
                 printf("select Timeout!\n");
                 exit(-1);
             }
-            if (read_frame(fd))   //读取一帧数据并生成一张图片
+            if (read_frame(fd))   //Read a frame of data and generate a picture.
                 break;
         }
     }
 	
-	//关闭摄像头数据流
+	//Turn off the camera data stream
     stop_capture(fd);
     close_camera_device(fd);
 	printf("record quited\n");
