@@ -7,7 +7,7 @@
 # 	
 #	
 ##################################
-subdirs = libaenet libstl libutility libpthread liblog libcrypt libuuid librtsp #libprotocol #liblua
+subdirs = libaenet libstl libutility libpthread liblog libcrypt libuuid librtsp libhttpserver#libprotocol #liblua
 subdirs += main
 HOME=$(shell pwd)
 export HOME

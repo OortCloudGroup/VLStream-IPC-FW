@@ -2,8 +2,7 @@
 #include "../libutility/libutility.h"
 
 #include "t_rtsp_server.h"
-//#include "rtsp_server.h"
-#include "rtsp_demo.h"
+#include "../librtsp/rtsp_demo.h"
 
 #ifdef __linux__
 #include <unistd.h>

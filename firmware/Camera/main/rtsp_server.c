@@ -1,13 +1,12 @@
 /*
- * @Author: cijliu
- * @Date: 2021-02-04 16:04:16
- * @LastEditTime: 2021-02-26 17:01:59
+ * @Author: wangxu
+ * @LastEditTime: 2024-12-30 16:38:36
  */
 #include <stdio.h>
-#include "../librtsp/include/rtp.h"
-#include "../librtsp/include/rtsp_parse.h"
-#include "../librtsp/include/rtsp_handler.h"
-#include "../librtsp/include/h264.h" //../librtsp/include/
+// #include "../librtsp/include/rtp.h"
+// #include "../librtsp/include/rtsp_parse.h"
+// #include "../librtsp/include/rtsp_handler.h"
+// #include "../librtsp/include/h264.h" //../librtsp/include/
 #include <sys/socket.h>
 #include <unistd.h>
 #include <sys/stat.h>
@@ -16,9 +15,9 @@
 #include <signal.h>
 
 #include "pthread.h"
-#include "../librtsp/include/net.h"
+// #include "../librtsp/include/net.h"
 #include "rtsp_server.h"
-#include "rtsp_demo.h"
+#include "../librtsp/rtsp_demo.h"
 #include "queueFrame.h"
 
 extern FrameQueue g_queue;
@@ -41,11 +40,6 @@ static void sig_proc(int signo)
 {
 	flag_run = 0;
 }
-
-
-ip_t * ipaddr;
-tcp_t tcp;
-int client;
 
 int c_init_rtsp()
 {
@@ -100,55 +94,8 @@ int c_do_rtsp_handler()
 
         Frame frame = dequeue(&g_queue);
         if(frame.data && frame.size > 0){
-            //printf("当前时间: %ld",ts);
             rtsp_tx_video(session[0], frame.data, frame.size, ts);
         }
-		// for (ch = 0; ch < session_count; ch++) {
-		// 	if (fp[ch][0]) {
-		// 	read_video_again:
-		// 		ret = get_next_video_frame(fp[ch][0], &vbuf, &vsize);
-		// 		if (ret < 0) {
-		// 			fprintf(stderr, "get_next_video_frame failed\n");
-		// 			flag_run = 0;
-		// 			break;
-		// 		}
-		// 		if (ret == 0) {
-		// 			fseek(fp[ch][0], 0, SEEK_SET);
-		// 			if (fp[ch][1])
-		// 				fseek(fp[ch][1], 0, SEEK_SET);
-		// 			goto read_video_again;
-		// 		}
-
-		// 		if (session[ch])
-		// 			rtsp_tx_video(session[ch], vbuf, vsize, ts);
-
-		// 		type = 0;
-		// 		if (vbuf[0] == 0 && vbuf[1] == 0 && vbuf[2] == 1) {
-		// 			type = vbuf[3] & 0x1f;
-		// 		}
-		// 		if (vbuf[0] == 0 && vbuf[1] == 0 && vbuf[2] == 0 && vbuf[3] == 1) {
-		// 			type = vbuf[4] & 0x1f;
-		// 		}
-		// 		if (type != 5 && type != 1)
-		// 			goto read_video_again;
-		// 	}
-
-		// 	if (fp[ch][1]) {
-		// 		ret = get_next_audio_frame(fp[ch][1], &abuf, &asize);
-		// 		if (ret < 0) {
-		// 			fprintf(stderr, "get_next_audio_frame failed\n");
-		// 			break;
-		// 		}
-		// 		if (ret == 0) {
-		// 			fseek(fp[ch][1], 0, SEEK_SET);
-		// 			if (fp[ch][0])
-		// 				fseek(fp[ch][0], 0, SEEK_SET);
-		// 			continue;
-		// 		}
-		// 		if (session[ch])
-		// 			rtsp_tx_audio(session[ch], abuf, asize, ts);
-		// 	}
-		// }
 
 		do {
 			ret = rtsp_do_event(demo);
@@ -173,28 +120,7 @@ int c_do_rtsp_handler()
 
 void c_deinit_rtsp()
 {
-    //free(vbuf);
-	//free(abuf);
-	
-	// for (ch = 0; ch < session_count; ch++) {
-	// 	if (fp[ch][0])
-	// 		fclose(fp[ch][0]);
-	// 	if (fp[ch][1])
-	// 		fclose(fp[ch][1]);
-	// 	if (session[ch])
-	// 		rtsp_del_session(session[ch]);
-	// }
     signal(SIGINT, sig_proc);
     rtsp_del_session(session[0]);
 	rtsp_del_demo(demo);
 }
-
-// void main()
-// {
-//     pthread_t rtsp_id;
-//     pthread_create(&rtsp_id,NULL,rtsp_thread,&ip);
-//     while(1){
-//         sleep(1);
-//     }
-
-// }

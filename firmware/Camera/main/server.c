@@ -1,12 +1,7 @@
 /*
- Authors: ZhangXuelian
- 	
-
-
- Changes:
- 	
-	
-*/
+ * @Author: wangxu
+ * @LastEditTime: 2024-12-30 16:38:36
+ */
 
 #include "server.h"
 
@@ -265,6 +260,7 @@ int main(int argc, char ** argv)
 	
 	bool record_thread_alive = false;
 	bool rtsp_thread_alive = false;
+	bool server_thread_alive = false;
 
 	if (! t_create_record_thread())
 		goto quit;
@@ -276,15 +272,20 @@ int main(int argc, char ** argv)
 	else
 		rtsp_thread_alive = true;
 
+	if (! t_create_server_thread())
+		goto quit;
+	else
+		server_thread_alive = true;
 	sleep(1);
 
 	while(1)
 	{
 		record_thread_alive = t_is_record_thread_alive();
 		rtsp_thread_alive = t_is_rtsp_thread_alive();
-		
+		//server_thread_alive = t_is_server_thread_alive();
 		if(!record_thread_alive 
-		|| !rtsp_thread_alive)
+		|| !rtsp_thread_alive
+		|| !server_thread_alive)
 		{
 			printf("main loop leave\n");
 			break;

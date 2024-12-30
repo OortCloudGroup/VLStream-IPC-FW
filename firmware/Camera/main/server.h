@@ -61,6 +61,8 @@
 #include "t_record.h"
 #include "t_rtsp_server.h"
 #include "queueFrame.h"
+#include "t_server.h"
+
 
 // Error codes 
 #define C_OK                    0
