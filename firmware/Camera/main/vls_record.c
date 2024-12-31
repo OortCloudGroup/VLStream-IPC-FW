@@ -9,7 +9,7 @@
 
 #include "../include/x264.h"
 #include "../include/x264_config.h"
-#include "t_record.h"
+#include "vls_record.h"
 #include "c_h264_encoder.h"
 
 
@@ -21,7 +21,7 @@ extern FrameQueue g_queue;  // Reference global queue
 THREAD_CONTEXT g_record_thread_context;
 static void * record_thread_function(void * arg);
 
-bool t_create_record_thread()
+bool vls_create_record_thread()
 {
 	bool ret;
 	g_record_thread_context.alive_threshold = RECORD_THREAD_ALIVE_THRESHOLD;

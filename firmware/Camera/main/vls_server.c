@@ -3,7 +3,7 @@
 #include "../libhttpserver/common.h"
 #include "../libhttpserver/c_server.h"
 
-#include "t_server.h"
+#include "vls_server.h"
 
 #define SERVER_THREAD_ALIVE_THRESHOLD				(60 * 100)
 #define SERVER_THREAD_PRIORITY						4
@@ -11,7 +11,7 @@
 THREAD_CONTEXT g_server_thread_context;
 static void * server_thread_function(void * arg);
 
-bool t_create_server_thread()
+bool vls_create_server_thread()
 {
 	bool ret;
 	g_server_thread_context.alive_threshold = SERVER_THREAD_ALIVE_THRESHOLD;

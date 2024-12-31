@@ -1,7 +1,7 @@
 #include "../libpthread/libpthread.h"
 #include "../libutility/libutility.h"
 
-#include "t_rtsp_server.h"
+#include "vls_rtsp_server.h"
 #include "../librtsp/rtsp_demo.h"
 
 #ifdef __linux__
@@ -18,7 +18,7 @@
 THREAD_CONTEXT g_rtsp_thread_context;
 static void * rtsp_thread_function(void * arg);
 
-bool t_create_rtsp_thread()
+bool vls_create_rtsp_thread()
 {
 	bool ret;
 	g_rtsp_thread_context.alive_threshold = RTSP_THREAD_ALIVE_THRESHOLD;
