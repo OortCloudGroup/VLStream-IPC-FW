@@ -11,15 +11,15 @@
 include ../config.mk
 include ../server.mk
 
-EXTRALIB += -lae_stl -lae_pthread -lae_net -lae_log  -lae_utility  #-lae_protocol
-EXTRALIB += -lpthread -lrt -lrtsp -lx264 -lm -lserver#-ldl -lm -lc 
+EXTRALIB += -lae_stl -lae_pthread -lae_net -lae_utility  #-lae_protocol
+EXTRALIB += -lpthread -lrt -lrtsp -lx264 -lm -lserver#-lae_log -ldl -lm -lc 
 
 ifeq ($(USE_SSL),y)
 EXTRALIB += -lssl -lcrypto 
 endif
 
 #------------------------------------------------- 
-OBJS = server.o server_cron.o t_dict.o option.o networking.o t_record.o t_rtsp_server.o t_server.o h264encoder.o queueFrame.o rtsp_server.o #rtsp_demo.o rtsp_msg.o rtp_enc.o stream_queue.o utils.o
+OBJS = server.o t_record.o t_rtsp_server.o t_server.o c_h264_encoder.o c_queue_frame.o c_rtsp_server.o
 #-------------------------------------------------
 TARGET = server
 #-------------------------------------------------
@@ -33,5 +33,5 @@ endif
 .PHONY: clean
 
 clean: 
-	rm -f $(TARGET)
+	rm -f $(TARGET) $(OBJS)
     

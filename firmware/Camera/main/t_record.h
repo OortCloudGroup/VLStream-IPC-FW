@@ -1,7 +1,7 @@
 #ifndef _T_RECORD_H_
 #define _T_RECORD_H_
 
-#include "queueFrame.h"
+#include "c_queue_frame.h"
 
 extern THREAD_CONTEXT g_record_thread_context;
 //extern FrameQueue g_queue;

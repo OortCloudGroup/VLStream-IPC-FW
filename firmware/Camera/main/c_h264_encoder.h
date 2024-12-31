@@ -1,5 +1,5 @@
-#ifndef _H264ENCODER_H
-#define _H264ENCODER_H
+#ifndef _C_H264_ENCODER_H
+#define _C_H264_ENCODER_H
 
 #include <stdint.h>
 #include <stdio.h>

@@ -16,9 +16,9 @@
 
 #include "pthread.h"
 // #include "../librtsp/include/net.h"
-#include "rtsp_server.h"
+#include "c_rtsp_server.h"
 #include "../librtsp/rtsp_demo.h"
-#include "queueFrame.h"
+#include "c_queue_frame.h"
 
 extern FrameQueue g_queue;
 

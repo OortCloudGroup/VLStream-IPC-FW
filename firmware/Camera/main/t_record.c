@@ -10,7 +10,7 @@
 #include "../include/x264.h"
 #include "../include/x264_config.h"
 #include "t_record.h"
-#include "h264encoder.h"
+#include "c_h264_encoder.h"
 
 
 extern FrameQueue g_queue;  // Reference global queue

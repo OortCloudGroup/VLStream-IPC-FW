@@ -2,14 +2,14 @@
 #     FileName: h264encoder.c
 #         Desc: this program aim to get image from USB camera,
 #               used the V4L2 interface.
-#       Author: licaibiao
+#       Author: wangxu
 #      Version: 
-#   LastChange: 2017-02-21 
+#   LastChange: 2024-12-31 
 =============================================================================*/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "h264encoder.h"
+#include "c_h264_encoder.h"
 
 int WIDTH = 640;
 int HEIGHT = 480;
