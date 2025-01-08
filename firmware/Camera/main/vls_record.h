@@ -1,5 +1,5 @@
-#ifndef _T_RECORD_H_
-#define _T_RECORD_H_
+#ifndef _VLS_RECORD_H_
+#define _VLS_RECORD_H_
 
 #include "c_queue_frame.h"
 

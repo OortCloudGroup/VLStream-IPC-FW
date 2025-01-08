@@ -1,5 +1,5 @@
-#ifndef _T_RTSP_SERVER_H_
-#define _T_RTSP_SERVER_H_
+#ifndef _VLS_RTSP_SERVER_H_
+#define _VLS_RTSP_SERVER_H_
 
 extern THREAD_CONTEXT g_rtsp_thread_context;
 

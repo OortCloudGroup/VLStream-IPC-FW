@@ -1,5 +1,5 @@
-#ifndef _T_SERVER_H_
-#define _T_SERVER_H_
+#ifndef _VLS_SERVER_H_
+#define _VLS_SERVER_H_
 
 extern THREAD_CONTEXT g_server_thread_context;
 

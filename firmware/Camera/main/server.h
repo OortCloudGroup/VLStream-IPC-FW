@@ -62,6 +62,7 @@
 #include "vls_rtsp_server.h"
 #include "c_queue_frame.h"
 #include "vls_server.h"
+#include "vls_upload.h"
 
 
 // Error codes 

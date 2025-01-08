@@ -108,7 +108,8 @@ int c_do_rtsp_handler()
 		if (ret < 0)
 			return 1;
 		ts += 1000000 / 25;
-		printf(".");fflush(stdout);
+		// printf(".");
+        fflush(stdout);
 	}else
     {
         return 0;
