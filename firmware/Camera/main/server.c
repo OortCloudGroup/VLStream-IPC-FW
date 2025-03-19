@@ -16,6 +16,7 @@ int main(int argc, char ** argv)
 	bool vls_rtsp_thread_alive = false;
 	bool vls_server_thread_alive = false;
 	bool vls_uplaod_thread_alive = false;
+	bool vls_webrtc_thread_alive = false;
 
 	if (! vls_create_record_thread())
 		goto quit;
@@ -36,19 +37,24 @@ int main(int argc, char ** argv)
 		goto quit;
 	// else
 	// 	vls_uplaod_thread_alive = true;
+
+	if(! vls_create_webrtc_thread())
+		goto quit;
+	else
+		vls_webrtc_thread_alive = true;
 	
 
 	sleep(1);
 
 	while(1)
 	{
-		vls_record_thread_alive = vls_is_record_thread_alive();
-		vls_rtsp_thread_alive = vls_is_rtsp_thread_alive();
-		vls_server_thread_alive = vls_is_server_thread_alive();
+		// vls_record_thread_alive = vls_is_record_thread_alive();
+		// vls_rtsp_thread_alive = vls_is_rtsp_thread_alive();
+		// vls_server_thread_alive = vls_is_server_thread_alive();
 		//vls_uplaod_thread_alive = vls_is_upload_thread_alive();
-		if(!vls_record_thread_alive 
+		if(/*!vls_record_thread_alive 
 		|| !vls_rtsp_thread_alive
-		|| !vls_server_thread_alive)  //|| !vls_uplaod_thread_alive
+		||*/ !vls_server_thread_alive)  //|| !vls_uplaod_thread_alive
 		{
 			printf("main loop leave\n");
 			break;

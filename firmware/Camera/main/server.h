@@ -63,6 +63,7 @@
 #include "c_queue_frame.h"
 #include "vls_server.h"
 #include "vls_upload.h"
+#include "vls_webrtc_push.h"
 
 
 // Error codes 

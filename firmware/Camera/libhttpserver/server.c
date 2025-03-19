@@ -29,6 +29,8 @@
 #include <linux/wireless.h>
 #include <net/if_arp.h>
 #include <sys/soundcard.h>
+#include <errno.h>
+
 
 #include "g_list.h"
 #include "g_utility.h"
@@ -48,13 +50,14 @@ extern INDEX_CONTEXT index_context;
 #define T__INDEX_CONTEXT (&(index_context))
 //////////////////////
 
+
 #define WEBSERVER_NAME					     			"uhttpd/0.0.010"
 #define HTTP_HOME						                "/web"
 #define HTTP_DEFAULT_FILE								"/index.htm"
 #define MIN_HTTP_SEND_BUFFER_SIZE						1024
 
 #define SERVER_MSG_QUEUE_SIZE							1024
-#define SERVER_BUFFER_SIZE								(1024 * 200)
+#define SERVER_BUFFER_SIZE								(1024 * 100)
 #define MAX_CLIENTS_NUMBER								(FD_SETSIZE - 2)
 #define VIDEOSTREAM_BOUNDARY							"wifi_shd"
 #define RFC1123FMT										"%a, %d %b %Y %H:%M:%S GMT"
@@ -79,7 +82,8 @@ typedef struct tagServerContext
 	unsigned int clients_number;
 	fd_set w_fds;
 	fd_set r_fds;
-	char buffer[SERVER_BUFFER_SIZE];  
+	char buffer[SERVER_BUFFER_SIZE];
+	//char* buffer;
 	char time_buffer[64];
 	unsigned long tick;
 	bool first_line_ok;
@@ -140,6 +144,7 @@ SERVER_CONTEXT g_server_context = {0};
 extern bool _make_http_client_resp(CLIENT * client, int result, bool reauth, const char * title, const char * content_type, const char * content, int content_len);
 #define c_make_http_client_resp(client, result, title, content) _make_http_client_resp(client, result, false, title, "text/plain", content, strlen(content))
 #define c_make_http_client_html_resp(client, content, content_len) _make_http_client_resp(client, 200, false, "OK", "text/plain", content, content_len)
+
 bool c_make_http_client_json_error_resp(CLIENT * client, int error);
 
 bool _make_http_client_resp(CLIENT * client, int result, bool reauth, const char * title, const char * content_type, const char * content, int content_len)
@@ -191,6 +196,113 @@ bool _make_http_client_resp(CLIENT * client, int result, bool reauth, const char
 	return true;	
 }
 
+// 读取 HTML 文件的函数
+char* read_html_file(const char *file_path) {
+    FILE *file = fopen(file_path, "rb");
+    if (!file) {
+        perror("Error opening file");
+        return NULL;
+    }
+
+    fseek(file, 0, SEEK_END);
+    long file_size = ftell(file);
+    fseek(file, 0, SEEK_SET);
+
+    char *content = (char *)my_malloc(file_size + 1);
+    if (!content) {
+        fclose(file);
+        return NULL;
+    }
+
+    fread(content, 1, file_size, file);
+    content[file_size] = '\0'; // Null-terminate the string
+
+    fclose(file);
+    return content;
+}
+
+// 创建HTTP响应并从HTML文件中读取内容
+bool make_http_html_response_from_file(CLIENT *client, int result, bool reauth, const char *file_path, const char *title)
+{
+    printf("%s: Enter!\n", __func__);
+
+    SERVER_CONTEXT *c = &g_server_context;
+    time_t now;
+
+    // 读取HTML文件内容
+    char *html_content = read_html_file(file_path);
+    if (!html_content) {
+        return false;
+    }
+
+    int content_len = strlen(html_content);
+    if (NULL == (client->send_data = (char *)my_malloc(content_len + MIN_HTTP_SEND_BUFFER_SIZE)))
+    {
+        free(html_content);
+        return false;
+    }
+
+    time(&now);
+    strftime(c->time_buffer, 64, RFC1123FMT, gmtime(&now));
+
+    // 生成HTTP响应头和内容
+    if (reauth)
+    {
+        char nonce[33];
+        // 此处假设我们生成一个 nonce，这个值应该是实际生成的唯一字符串
+        snprintf(nonce, sizeof(nonce), "dummy_nonce_value");
+
+        client->send_data_len = sprintf(client->send_data,
+            "HTTP/1.1 %d %s\r\n"
+            "Access-Control-Allow-Origin: *\r\n"
+            "Access-Control-Allow-Methods: POST, GET\r\n"
+            "Server: " WEBSERVER_NAME "\r\n"
+            "Date: %s\r\n"
+            "WWW-Authenticate: Digest realm=\"netac wifi shd\","
+            "qop=\"auth\","
+            "algorithm=MD5,"
+            "nonce=\"%s\"\r\n" 
+            "Content-Type: text/html\r\n"
+            "Content-Length: %d\r\n"
+            "Cache-Control: no-cache\r\n"
+            "Connection: close\r\n\r\n%s", 
+            result, title, c->time_buffer, nonce, content_len, html_content);
+    }
+    else
+    {
+        client->send_data_len = sprintf(client->send_data, 
+            "HTTP/1.1 %d %s\r\n"
+            "Access-Control-Allow-Origin: *\r\n"
+            "Access-Control-Allow-Methods: POST, GET\r\n"
+            "Server: " WEBSERVER_NAME "\r\n"
+            "Date: %s\r\n"
+            "Content-Type: text/html\r\n"
+            "Content-Length: %d\r\n"
+            "Cache-Control: no-cache\r\n"
+            "Connection: close\r\n\r\n%s", 
+            result, title, c->time_buffer, content_len, html_content);
+    }
+
+    client->send_data_offset = 0;
+    client->tick = c->tick;
+    client->http_period = SEND_HTTP_RESULT;
+
+    printf("%s: Leave!\n", __func__);
+
+    // 清理已分配的HTML文件内容
+    free(html_content);
+
+    return true;
+}
+
+// 读取文件内容并发送 HTML 响应的函数
+bool send_html_client(CLIENT *client, const char *file_path)  {
+	bool success = make_http_html_response_from_file(client, 200, false, file_path, "OK");
+    //free(client->send_data);
+
+    return success;
+}
+
 bool c_make_http_client_json_error_resp(CLIENT * client, int error)
 {
 	SERVER_CONTEXT * c = &g_server_context;
@@ -209,7 +321,7 @@ static inline bool make_http_client_file_resp(CLIENT * client, const char * cont
 {
 	SERVER_CONTEXT * c = &g_server_context;
 	time_t now;
-
+	printf("make_http_client_file_resp:%s  filename:%s\r\n",filepath,filename);
 	if (strstr(filepath, ".."))
 		return c_make_http_client_resp(client, 200, "Bad Request", "No service for directory.");
 	if (NULL == (client->http_file = fopen(filepath, "rb")))
@@ -294,6 +406,19 @@ char * del_line_symbol(char **str)
 
 }
 
+char *get_current_working_directory() {
+    char *cwd = (char *)malloc(PATH_MAX);
+    if (cwd == NULL) {
+        perror("malloc failed");
+        return NULL;
+    }
+    if (getcwd(cwd, PATH_MAX) == NULL) {
+        perror("getcwd() error");
+        free(cwd);
+        return NULL;
+    }
+    return cwd;
+}
 
 static inline bool handle_search_html_request(CLIENT * client)
 {
@@ -303,32 +428,187 @@ static inline bool handle_search_html_request(CLIENT * client)
 	int content_len = 0;
 	int len;
 
-	if (list_empty(&client->hrc.params_list))
-	{
-		return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
-	}
-	else
-	{
-		char * key = NULL;
-		list_for_each_safe(pos, next, &client->hrc.params_list)
-		{
-			http_param = list_entry(pos, HTTP_PARAM, list);
-			list_del(pos);
-			if (0 == strcasecmp(http_param->name, "key"))
-				key = str_assign(http_param->value);
-			my_safe_free(http_param);	
-		}
+	char strPath[256] =".";
+	  // 使用 strcat 连接字符串
+    strcat(strPath, client->hrc.relative_path);
+	printf("handle_search_html_request: %s \r\n",strPath);
+	send_html_client(client,strPath);
+	//c_make_http_client_html_resp();
+	// if (list_empty(&client->hrc.params_list))
+	// {
+	// 	return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+	// }
+	// else
+	// {
+	// 	char * key = NULL;
+	// 	list_for_each_safe(pos, next, &client->hrc.params_list)
+	// 	{
+	// 		http_param = list_entry(pos, HTTP_PARAM, list);
+	// 		list_del(pos);
+	// 		if (0 == strcasecmp(http_param->name, "key"))
+	// 			key = str_assign(http_param->value);
+	// 		my_safe_free(http_param);	
+	// 	}
 
-		//urldecode(key);
+	// 	//urldecode(key);
 		
-		if (0 > (len = c_search(client,key)))		
-			return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
-		content_len += len;
-		my_safe_free(key);	
-	}
+	// 	if (0 > (len = c_search(client,key)))		
+	// 		return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+	// 	content_len += len;
+	// 	my_safe_free(key);	
+	// }
 	return true;//c_make_http_client_html_resp(client, c->buffer, content_len);
 }
 
+
+#define CRLF "\r\n"
+
+// 模拟获取当前时间（毫秒）
+char* getCurrentTimeWithMilliseconds() {
+    struct timespec ts;
+    static char timeStr[64];
+    clock_gettime(CLOCK_REALTIME, &ts);
+    struct tm* tm_info = localtime(&ts.tv_sec);
+    strftime(timeStr, sizeof(timeStr), "%Y-%m-%d %H:%M:%S", tm_info);
+    snprintf(timeStr + strlen(timeStr), sizeof(timeStr) - strlen(timeStr), ".%03ld", ts.tv_nsec / 1000000);
+    return timeStr;
+}
+
+// 获取文件扩展名
+const char* getFileExtension(const char* filename) {
+    const char* ext = strrchr(filename, '.');
+    if (ext) return ext;
+    return "";
+}
+
+void getExecutablePath(char *buffer, size_t size) {
+    ssize_t len = readlink("/proc/self/exe", buffer, size - 1);
+    if (len == -1) {
+        perror("readlink");
+        buffer[0] = '\0';  // 如果读取失败，返回空字符串
+    } else {
+        buffer[len] = '\0';  // 确保字符串以 null 结尾
+    }
+}
+
+// 定义一个函数，用于将字符串数据写入文件
+int save_to_file(const char* filename, const char* content) {
+    // 打开文件，"w" 表示写入模式，文件不存在时会创建
+    FILE* file = fopen(filename, "w");
+    if (file == NULL) {
+        perror("无法打开文件");
+        return 1;  // 返回 1 表示出错
+    }
+
+    // 将内容写入文件
+    fprintf(file, "文件下载: %s\n", content);
+
+    // 关闭文件
+    fclose(file);
+
+    return 0;  // 返回 0 表示成功
+}
+
+// 解析表单数据并保存文件，返回是否成功
+bool parseFormDataAndSaveFile(const char* body, size_t body_len, const char* boundary) {
+	// printf("文件下载: %s \r\n",body);
+	// 调用函数保存数据到文件
+    if (save_to_file("output.txt", body) == 0) {
+        printf("数据已保存到 'output.txt' 文件。\n");
+    } else {
+        printf("保存数据到文件失败。\n");
+    }
+
+    char* data = strdup(body);
+    if (!data) return false;
+
+    char* boundary_pos = strstr(data, boundary);
+    if (boundary_pos == NULL) {
+        free(data);
+        return false;
+    }
+
+    boundary_pos += strlen(boundary);  // 跳过 boundary 部分
+    char* next_part = strstr(boundary_pos, boundary);
+    while (next_part != NULL) {
+        *next_part = '\0';  // 当前表单部分结束
+
+        // 解析文件字段
+        char* filename_pos = strstr(boundary_pos, "filename=\"");
+        if (filename_pos != NULL) {
+            filename_pos += strlen("filename=\"");
+            char* filename_end = strchr(filename_pos, '"');
+            if (filename_end != NULL) {
+                size_t filename_len = filename_end - filename_pos;
+                char filename[256];
+                strncpy(filename, filename_pos, filename_len);
+                filename[filename_len] = '\0';
+
+                // 获取文件路径
+                char filePath[512];
+				char path[1024];
+				getExecutablePath(path,sizeof(path));
+				
+                snprintf(filePath, sizeof(filePath), "%s/%s_%s%s",
+                         path,
+                         getCurrentTimeWithMilliseconds(),
+                         filename,
+                         getFileExtension(filename));
+
+                // 写入文件
+                FILE* ofs = fopen(filePath, "wb");
+                if (ofs == NULL) {
+                    free(data);
+                    return false;
+                }
+
+                // 获取文件内容并写入文件
+                char* content_start = strstr(boundary_pos, CRLF CRLF);
+                if (content_start != NULL) {
+                    content_start += strlen(CRLF CRLF);
+                    size_t content_len = next_part - content_start;
+                    fwrite(content_start, 1, content_len, ofs);
+                }
+
+                fclose(ofs);
+                printf("File saved to: %s\n", filePath);
+            }
+        }
+        boundary_pos = next_part + strlen(boundary);
+        next_part = strstr(boundary_pos, boundary);
+    }
+
+    free(data);
+    return true;
+}
+
+// 主函数，模拟处理 API 请求
+bool handle_api_request(const char* body, size_t body_len, const char* path) {
+    if (strcmp(path, "/api/RegFace") == 0) {
+		printf("handle_api_request: %s:%s\r\n111111111111",body,path);
+        size_t st = 0, ed = 0;
+        ed = strstr(body, CRLF) - body;  // 查找 CRLF 分隔符
+        char boundary[128];
+        strncpy(boundary, body, ed);
+        boundary[ed] = '\0';
+
+        printf("Boundary: %s\n", boundary);
+
+        // 解析表单数据并保存文件
+        if (!parseFormDataAndSaveFile(body, body_len, boundary)) {
+            printf("Error while parsing form data\n");
+            return false;
+        }
+
+        // 这里你可以发送响应数据
+        printf("File successfully saved.\n");
+
+        return true;
+    }
+
+    // 如果路径不匹配，返回失败
+    return false;
+}
 
 static inline bool handle_http_client_request(CLIENT * client)
 {
@@ -338,16 +618,21 @@ static inline bool handle_http_client_request(CLIENT * client)
 	int i;
 	int path_len = strlen(client->hrc.relative_path);
 	int suffix_len = strlen(".html");
-
+	printf("handle_http_client_request11111: %s \r\n",client->hrc.relative_path);
 	if ((path_len >= suffix_len) &&
 		(0 == strcasecmp(client->hrc.relative_path + path_len - suffix_len, ".html")))
 	{
-		if (0 == strcasecmp(client->hrc.relative_path, "/search.html"))
+		if (0 == strcasecmp(client->hrc.relative_path, "/resources/login.html")
+		|| 0 == strcasecmp(client->hrc.relative_path, "/resources/RegFace.html"))
 		{
+			printf("999999999: %s \r\n",client->hrc.relative_path);
 			return handle_search_html_request(client);
 			
 		}
 	}
+
+	handle_api_request(client->hrc.data, client->hrc.len, client->hrc.relative_path);
+	
 
 	// process common files
 	// http://www.cnblogs.com/campo/archive/2007/02/02/638348.aspx
@@ -383,8 +668,10 @@ static inline bool handle_http_client_request(CLIENT * client)
 		if ((path_len >= suffix_len) &&
 			(0 == strcasecmp(client->hrc.relative_path + path_len - suffix_len, mime_types[i].suffix)))
 		{
+			printf("handle_http_client_request222222:%s  %s\r\n",client->hrc.absolute_path,client->hrc.relative_path);
 			return make_http_client_file_resp(client, mime_types[i].content_type, client->hrc.absolute_path, NULL);
-		}
+		}	
+		
 	}
 	return make_http_client_file_resp(client, "application/octet-stream", client->hrc.absolute_path, NULL);
 }
@@ -400,6 +687,7 @@ bool c_parse_http_client_recved_data(CLIENT * client, int len)
 	{
 	case RECV_HTTP_HEADER:
 		ret2 = http_request_parse(&client->hrc, c->buffer, len);
+		printf("22222222222222222222222222222222222222: %s  \r\n ************************** \r\n",c->buffer);
 		if (ret2 == HTTP_BAD_REQUEST)
 			ret = c_make_http_client_resp(client, 200, "Bad Request", "Can\'t parse request.");
 		else if (ret2 == HTTP_INTERNAL_ERROR)
@@ -445,7 +733,7 @@ static inline bool start_listen()
 	int https;
 	struct sockaddr_in host;
 
-	port = (unsigned short)8080;
+	port = (unsigned short)8000; //8080
 
 	if (0 > (c->listen_sock = socket(AF_INET, SOCK_STREAM, 0)))
 	{
@@ -552,7 +840,7 @@ static inline bool parse_unknown_client_recved_data(CLIENT * client, int len)
 		memcpy(c->buffer, client->temp_buffer_4_unknown_client, client->len_of_temp_data_4_unknown_client);
 		len += client->len_of_temp_data_4_unknown_client;
 	}
-
+	printf("%s \r\n", c->buffer);
 	if (((len >= 4) && (0 == strncasecmp(c->buffer, "GET ", 4))) ||
 		((len >= 5) && (0 == strncasecmp(c->buffer, "POST ", 5))))
 	{
@@ -572,7 +860,7 @@ static inline bool parse_unknown_client_recved_data(CLIENT * client, int len)
 
 static inline bool parse_client_recved_data(CLIENT * client, int len)
 {
-	printf("Enter %s\n", __func__);
+	printf("1111111 Enter %s %d\n", __func__,(int)client->type);
 	SERVER_CONTEXT * c = &g_server_context;
 	bool ret = false;
 
@@ -675,13 +963,104 @@ void print_buf(char *buf, int len)
 	printf("\n");
 }
 
+// static inline void clients_handler()
+// {
+//     SERVER_CONTEXT * c = &g_server_context;
+//     struct list_head * pos, * next;
+//     CLIENT * client;
+//     int len;
+//     c->buffer = (char*)my_malloc(SERVER_BUFFER_SIZE);
+    
+//     if (c->buffer == NULL) {
+//         perror("Failed to allocate memory for client buffer");
+//         return;  
+//     }
+
+//     list_for_each_safe(pos, next, &c->clients_list)
+//     {
+//         client = list_entry(pos, CLIENT, list);
+
+//         // 如果客户端有可读数据
+//         if (FD_ISSET(client->sock, &c->r_fds))
+//         {
+//             FD_CLR(client->sock, &c->r_fds);
+            
+//             // 处理HTTP客户端
+//             if (client->type == HTTP_CLIENT)
+//             {
+//                 if ((client->http_period == RECV_HTTP_HEADER) || 
+//                     (client->http_period == RECV_HTTP_DATA))
+//                 {
+//                     client->tick = c->tick;
+//                 }
+//             }
+            
+//             // 对于UNKNOWN_CLIENT类型的客户端，我们需要处理其特殊数据
+//             if (client->type == UNKNOWN_CLIENT)
+//             {
+//                 len = recv(client->sock, c->buffer + client->len_of_temp_data_4_unknown_client, 
+//                            SERVER_BUFFER_SIZE - 1 - client->len_of_temp_data_4_unknown_client, 0);
+//             }
+//             else
+//             {
+//                 len = recv(client->sock, c->buffer, SERVER_BUFFER_SIZE - 1, 0);
+//             }
+
+//             // 如果接收数据长度为0或负数，说明客户端关闭或出现错误
+//             if (len <= 0)
+//             {
+//                 printf("remove_client\n");
+//                 remove_client(client);  
+//                 continue; // 处理下一个客户端
+//             }
+
+//             printf("recv:start************\r\n  %d : %s  99999999999999*********\r\n", len, c->buffer);
+            
+//             // 解析客户端接收到的数据
+//             if (!parse_client_recved_data(client, len))
+//             {
+//                 remove_client(client);  
+//                 continue; // 处理下一个客户端
+//             }
+//         }
+
+//         // 如果客户端有可写数据
+//         if (FD_ISSET(client->sock, &c->w_fds))
+//         {
+//             FD_CLR(client->sock, &c->w_fds);
+            
+//             // 处理HTTP客户端的发送
+//             if (client->type == HTTP_CLIENT)
+//             {
+//                 if (client->http_period == SEND_HTTP_RESULT)
+//                 {
+//                     client->tick = c->tick;
+//                 }
+//             }
+            
+//             // 发送客户端的数据
+//             if (!send_client_data(client))
+//             {
+//                 // 如果发送失败，可以添加相应的处理逻辑
+//             }
+//         }
+
+//         // 持续循环直到所有客户端的读写事件都处理完毕
+//     }
+// }
+
 static inline void clients_handler()
 {
 	SERVER_CONTEXT * c = &g_server_context;
 	struct list_head * pos, * next;
 	CLIENT * client;
 	int len;
-
+	// c->buffer = (char*)my_malloc(SERVER_BUFFER_SIZE);
+	if (c->buffer == NULL) {
+		perror("Failed to allocate memory for client buffer");
+		return;	  
+	}
+	int boundary_found = 0;
 	list_for_each_safe(pos, next, &c->clients_list)
 	{
 		client = list_entry(pos, CLIENT, list);
@@ -695,22 +1074,21 @@ static inline void clients_handler()
 					(client->http_period == RECV_HTTP_DATA))
 					client->tick = c->tick;
 			}
-			
 			if (client->type == UNKNOWN_CLIENT)
 				len = recv(client->sock, c->buffer + client->len_of_temp_data_4_unknown_client, SERVER_BUFFER_SIZE - 1 - client->len_of_temp_data_4_unknown_client, 0);
 			else
 				len = recv(client->sock, c->buffer, SERVER_BUFFER_SIZE - 1, 0);
 
 			//printf("%s",c->buffer);
-			printf("recv %d",len);
+			printf("recv:start************\r\n  %d : %s \n",len,c->buffer);
 			//print_buf(c->buffer,len);
-			if (0 >= len)
+			if (len <= 0)
 			{
 				printf("remove_client\n");
 				remove_client(client);	
 				continue;
 			}
-			if (! parse_client_recved_data(client, len))
+			else if (! parse_client_recved_data(client, len))
 			{
 				remove_client(client);	
 				continue;

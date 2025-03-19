@@ -40,7 +40,7 @@ static void * upload_thread_function(void * arg)
 	{
 		//printf("server: %ld \r\n",c->tick);
 		//c->tick = get_tickcount();
-		//里面是一条下载线程poll的方式阻塞降低cpu
+		//里面是一条下载线程poll的方式阻塞降低cpu占用
 		c_do_upload_handler();
 	}
 	
