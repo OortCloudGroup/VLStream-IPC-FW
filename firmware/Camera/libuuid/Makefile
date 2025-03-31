@@ -1,5 +1,7 @@
 subdirs = libg_uuid libc_uuid
-subdirs += main
+
+#subdirs += main
+
 HOME=$(shell pwd)
 export HOME
 all:

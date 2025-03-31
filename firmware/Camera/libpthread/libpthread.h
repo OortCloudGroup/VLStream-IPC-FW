@@ -47,6 +47,9 @@ extern "C"{
 #include <linux/tcp.h>
 #include "tcp_lib_types.h"
 
+#include "../main/c_queue_frame.h"
+
+
 #define MIN_PRIORITY 0
 #define MAX_PRIORITY 5
 
@@ -60,6 +63,10 @@ typedef struct tagThreadContext
 	pthread_t thread;
 	void * (* handler)(void * arg);
 } THREAD_CONTEXT;
+<<<<<<< HEAD
+=======
+
+>>>>>>> 1d066d3de199d42c947f37b2380c06786456b914
 bool create_thread(THREAD_CONTEXT * c);
 #define end_thread(c) c.exit = true
 bool is_thread_alive(THREAD_CONTEXT * c);

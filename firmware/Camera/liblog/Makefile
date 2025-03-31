@@ -9,7 +9,9 @@ all : debug.o
 	cp $(TARGET) $(MYLIB)
 
 %.o: %.c
-	$(CC) -c $(CFLAGS) -o $@ $<
+
+	$(CC) -c -fPIE $(CFLAGS) -o $@ $<
+
 
 clean :
 	/bin/rm -f *.o

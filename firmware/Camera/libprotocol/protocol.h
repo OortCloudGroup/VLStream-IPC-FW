@@ -26,7 +26,9 @@ typedef enum {
 
 // 2、要支持的私有协议的头文件。
 // protocol public file
-#include "cmd_proto.h"
+
+//#include "cmd_proto.h"
+
 bool parse_command_recved_data(void * __client);
 
 // comm function.

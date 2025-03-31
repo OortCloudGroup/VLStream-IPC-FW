@@ -7,6 +7,12 @@
 # 	
 #	
 ##################################
+
+INCLUDE_WEBRTC = -I../libwebrtc/include -I../libwebrtc/src -I../libwebrtc/src/yangpush -I../libwebrtc/thirdparty/include -I../libwebrtc/thirdparty/user_include
+
+INCLUDE_WEBRTC_LIB = -L../libwebrtc/thirdparty/lib -L../libwebrtc/bin/lib_release/
+
+
 ifeq ($(PLATFORM),UBUNTU64)
 	CROSS_COMPILE=
 	CC=$(CROSS_COMPILE)gcc
@@ -17,9 +23,11 @@ ifeq ($(PLATFORM),UBUNTU64)
 	HOME=$(shell pwd)
 	export HOME
 	INC = -I. -I$(HOME)/include 
-	CFLAGS = $(INC) -I. -I../include -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float
+
+	CFLAGS = $(INC) -I. -I../include -I../librtsp $(INCLUDE_WEBRTC) -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float -fPIC
 	MYLIB = ../lib
-	LDFLAGS = -L. -L$(MYLIB) -L../lib
+	LDFLAGS = -L. -L$(MYLIB) -L../lib -L$(shell dirname $(HOME))/lib $(INCLUDE_WEBRTC_LIB)
+
 endif
 
 ifeq ($(PLATFORM),UBUNTU32)
@@ -32,9 +40,11 @@ ifeq ($(PLATFORM),UBUNTU32)
 	HOME=$(shell pwd)
 	export HOME
 	INC = -I. -I$(HOME)/include 
-	CFLAGS = $(INC) -I. -I../include -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float
+
+	CFLAGS = $(INC) -I. -I../include -I../librtsp $(INCLUDE_WEBRTC) -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float -fPIC
 	MYLIB = $(HOME)/lib
-	LDFLAGS = -L. -L$(MYLIB) -L../lib
+	LDFLAGS = -L. -L$(MYLIB) -L../lib -L$(shell dirname $(HOME))/lib $(INCLUDE_WEBRTC_LIB)
+
 endif	
 
 ifeq ($(PLATFORM),CENTOS64)
@@ -47,9 +57,11 @@ ifeq ($(PLATFORM),CENTOS64)
 	HOME=$(shell pwd)
 	export HOME
 	INC = -I. -I$(HOME)/include 
-	CFLAGS = $(INC) -I. -I../include -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float
+
+	CFLAGS = $(INC) -I. -I../include -I../librtsp $(INCLUDE_WEBRTC) -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float -fPIC
 	MYLIB = $(HOME)/lib
-	LDFLAGS = -L. -L$(MYLIB) -L../lib
+	LDFLAGS = -L. -L$(MYLIB) -L../lib -L$(shell dirname $(HOME))/lib $(INCLUDE_WEBRTC_LIB)
+
 endif
 
 ifeq ($(PLATFORM),CENTOS32)
@@ -62,9 +74,11 @@ ifeq ($(PLATFORM),CENTOS32)
 	HOME=$(shell pwd)
 	export HOME
 	INC = -I. -I$(HOME)/include 
-	CFLAGS = $(INC) -I. -I../include -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float
+
+	CFLAGS = $(INC) -I. -I../include -I../librtsp $(INCLUDE_WEBRTC) -finline-functions -D__LINUX_FILE__ -DHAVE_EPOLL -O3 -fomit-frame-pointer -fPIE -pipe  -Dlinux -D__linux__ -Dunix -DEMBED -D_GNU_SOURCE -msoft-float -fPIC
 	MYLIB = $(HOME)/lib
-	LDFLAGS = -L. -L$(MYLIB) -L../lib
+	LDFLAGS = -L. -L$(MYLIB) -L../lib -L$(shell dirname $(HOME))/lib $(INCLUDE_WEBRTC_LIB)
+
 endif
 
 ifeq ($(RELEASE),y)

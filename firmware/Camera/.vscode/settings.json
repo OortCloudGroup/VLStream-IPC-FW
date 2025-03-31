@@ -1,0 +1,18 @@
+{
+    "files.associations": {
+        "libpthread.h": "c",
+        "libutility.h": "c",
+        "server.h": "c",
+        "t_record.h": "c",
+        "rtsp_parse.h": "c",
+        "rtp.h": "c",
+        "t_rtsp_server.h": "c",
+        "tcp_lib_types.h": "c",
+        "rtsp_server.h": "c",
+        "net.h": "c",
+        "fcntl.h": "c",
+        "rtsp_handler.h": "c",
+        "h264.h": "c",
+        "stdio.h": "c"
+    }
+}
