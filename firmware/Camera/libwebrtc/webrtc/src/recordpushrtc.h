@@ -11,6 +11,9 @@
 #include <yangutil/sys/YangSysMessageHandle.h>
 #include <yangpush/YangPushFactory.h>
 
+#include "yangrecordthread.h"
+#include "recordpushrtc_capi.h"
+
 #define Yang_SendVideo_ 0
 
 class RecordPushRtc : public YangSysMessageI,public YangSysMessageHandleI
@@ -38,8 +41,10 @@ public:
     YangVideoInfo m_outInfo;
 
     YangSysMessageHandle *m_message;
-
-
+    //视频帧回调函数
+    void setVideoCallback(VideoFrameCallback callback);
+    // 返回视频帧函数据
+    void onVideoFrame(const uint8_t* data, int32_t width, int32_t height, int32_t length);
 public:
     void initPreview();
     void success();
@@ -66,9 +71,13 @@ private:
     int32_t m_screenInternal;
     YangPushFactory m_pushfactory;
 
-    YangVideoBuffer *m_videoBuffer;
+    // YangVideoBuffer *m_videoBuffer;
 
     YangPushFactory m_mf;
+    //摄像头画面线程
+    YangRecordThread m_rt;
+    //回调
+    VideoFrameCallback m_videoCallback = nullptr;
 };
 
 #endif // RECORDPUSHRTC_H

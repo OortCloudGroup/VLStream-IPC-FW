@@ -15,7 +15,6 @@ public:
 
 	YangVideoBuffer(int32_t pwid,int32_t phei,YangYuvType ptype,int32_t pBitDepthLen);
 	~YangVideoBuffer(void);
-	void initTemp();
 	void init(int32_t pwid,int32_t phei,YangYuvType ptype);
 
 

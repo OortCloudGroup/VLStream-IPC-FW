@@ -72,6 +72,9 @@ extern INDEX_CONTEXT index_context;
 #define	JSON_ERROR_BAD_REQUEST			-6
 #define	JSON_ERROR_SYSTEM_BUSY			-7
 
+#define API_PTZ "/API/Ptz"
+#define API_ZOOM "/API/Zoom"
+#define API_RTCURL "/API/RtcUrl"
 
 // server
 typedef struct tagServerContext
@@ -149,7 +152,7 @@ bool c_make_http_client_json_error_resp(CLIENT * client, int error);
 
 bool _make_http_client_resp(CLIENT * client, int result, bool reauth, const char * title, const char * content_type, const char * content, int content_len)
 {
-	printf("%s: Enter!\n", __func__);
+	printf("%s: Enter! \n", __func__);
 	SERVER_CONTEXT * c = &g_server_context;
 	time_t now;
 
@@ -315,6 +318,18 @@ bool c_make_http_client_json_error_resp(CLIENT * client, int error)
 	return c_make_http_client_html_resp(client, c->buffer, len);
 }
 
+bool c_make_http_client_json_result_resp(CLIENT * client, int result,char* msg)
+{
+	SERVER_CONTEXT * c = &g_server_context;
+	int len;
+
+	if (client->hrc.json == JSONP)
+		len = sprintf(c->buffer, "%s({\"code\":%d,\"Msg\":%s});", ((! client->hrc.jsonp_callback)||(! client->hrc.jsonp_callback[0]))?"callback":client->hrc.jsonp_callback, result,msg);
+	else
+		len = sprintf(c->buffer, "{\"code\":%d,\"Msg\":%s}", result,msg);
+	return c_make_http_client_html_resp(client, c->buffer, len);
+}
+
 static inline bool make_http_client_file_resp(CLIENT * client, const char * content_type, const char * filepath, const char * filename);
 
 static inline bool make_http_client_file_resp(CLIENT * client, const char * content_type, const char * filepath, const char * filename)
@@ -428,38 +443,159 @@ static inline bool handle_search_html_request(CLIENT * client)
 	int content_len = 0;
 	int len;
 
-	char strPath[256] =".";
-	  // 使用 strcat 连接字符串
-    strcat(strPath, client->hrc.relative_path);
-	printf("handle_search_html_request: %s \r\n",strPath);
-	send_html_client(client,strPath);
-	//c_make_http_client_html_resp();
-	// if (list_empty(&client->hrc.params_list))
-	// {
-	// 	return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
-	// }
-	// else
-	// {
-	// 	char * key = NULL;
-	// 	list_for_each_safe(pos, next, &client->hrc.params_list)
-	// 	{
-	// 		http_param = list_entry(pos, HTTP_PARAM, list);
-	// 		list_del(pos);
-	// 		if (0 == strcasecmp(http_param->name, "key"))
-	// 			key = str_assign(http_param->value);
-	// 		my_safe_free(http_param);	
-	// 	}
+	if (list_empty(&client->hrc.params_list))
+	{
+		return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+	}
+	else
+	{
+		char * key = NULL;
+		list_for_each_safe(pos, next, &client->hrc.params_list)
+		{
+			http_param = list_entry(pos, HTTP_PARAM, list);
+			list_del(pos);
+			if (0 == strcasecmp(http_param->name, "key"))
+				key = str_assign(http_param->value);
+			my_safe_free(http_param);	
+		}
 
-	// 	//urldecode(key);
+		//urldecode(key);
 		
-	// 	if (0 > (len = c_search(client,key)))		
-	// 		return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
-	// 	content_len += len;
-	// 	my_safe_free(key);	
-	// }
-	return true;//c_make_http_client_html_resp(client, c->buffer, content_len);
+		if (0 > (len = c_search(client,key)))		
+			return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+		content_len += len;
+		my_safe_free(key);	
+	}
+	return c_make_http_client_html_resp(client, c->buffer, content_len);
 }
 
+static inline bool handle_API_request(CLIENT * client)
+{
+	SERVER_CONTEXT * c = &g_server_context;
+	HTTP_PARAM * http_param;
+	struct list_head * pos, * next;
+	int content_len = 0;
+	int len;
+	
+	printf("\r\nhandle_API_request 1111111111111111\r\n");
+
+	if (list_empty(&client->hrc.params_list))
+	{
+		return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+	}
+	else
+	{
+		char * key = NULL;
+		int ret = -1;
+		list_for_each_safe(pos, next, &client->hrc.params_list)
+		{
+			if(0 == strcasecmp(client->hrc.relative_path, API_PTZ))
+			{
+				http_param = list_entry(pos, HTTP_PARAM, list);
+				list_del(pos);
+				key = str_assign(http_param->value);
+				if (0 == strcasecmp(http_param->name, "top"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "bottom"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "left"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "right"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "reset"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "SmallZoom"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "BigZoom"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "SmallFocus"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "BigFocus"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "SmallAperture"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "BigAperture"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "light"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "AuxFocus"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "CaReset"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "ManTracking"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "3DManTracking"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "oneKeyCruise"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				else if(0 == strcasecmp(http_param->name, "oneKeyWatch"))
+				{
+					printf("\r\n setname: %s setAngle: %s \r\n",http_param->name,key);
+				}
+				// printf("\r\nhandle_API_request 333333333333333333333333333 %d %s\r\n",Index,key);
+				if(ret == 1){
+					return c_make_http_client_json_result_resp(client, 200, "success");
+				}else if(ret == -1){
+					return c_make_http_client_json_result_resp(client, -1, "Don't have the PTZ interface");
+				}
+				
+
+				my_safe_free(http_param);	
+				printf("\r\n handle_API_request: %s c->buffer = %s \r\n",key,c->buffer);
+			}
+			// else if(0 == strcasecmp(client->hrc.relative_path, API_ZOOM))
+			// {
+
+
+			// }
+		}
+		
+		
+
+		//urldecode(key);
+		
+		// if (0 > (len = c_search(client,key)))		
+		// 	return c_make_http_client_json_error_resp(client, JSON_ERROR_BAD_PARAM);
+		// content_len += len;
+		// my_safe_free(key);	
+	}
+	 
+	return c_make_http_client_json_result_resp(client, 200, "Don't have the PTZ interface");
+}
 
 #define CRLF "\r\n"
 
@@ -509,107 +645,6 @@ int save_to_file(const char* filename, const char* content) {
     return 0;  // 返回 0 表示成功
 }
 
-// 解析表单数据并保存文件，返回是否成功
-bool parseFormDataAndSaveFile(const char* body, size_t body_len, const char* boundary) {
-	// printf("文件下载: %s \r\n",body);
-	// 调用函数保存数据到文件
-    if (save_to_file("output.txt", body) == 0) {
-        printf("数据已保存到 'output.txt' 文件。\n");
-    } else {
-        printf("保存数据到文件失败。\n");
-    }
-
-    char* data = strdup(body);
-    if (!data) return false;
-
-    char* boundary_pos = strstr(data, boundary);
-    if (boundary_pos == NULL) {
-        free(data);
-        return false;
-    }
-
-    boundary_pos += strlen(boundary);  // 跳过 boundary 部分
-    char* next_part = strstr(boundary_pos, boundary);
-    while (next_part != NULL) {
-        *next_part = '\0';  // 当前表单部分结束
-
-        // 解析文件字段
-        char* filename_pos = strstr(boundary_pos, "filename=\"");
-        if (filename_pos != NULL) {
-            filename_pos += strlen("filename=\"");
-            char* filename_end = strchr(filename_pos, '"');
-            if (filename_end != NULL) {
-                size_t filename_len = filename_end - filename_pos;
-                char filename[256];
-                strncpy(filename, filename_pos, filename_len);
-                filename[filename_len] = '\0';
-
-                // 获取文件路径
-                char filePath[512];
-				char path[1024];
-				getExecutablePath(path,sizeof(path));
-				
-                snprintf(filePath, sizeof(filePath), "%s/%s_%s%s",
-                         path,
-                         getCurrentTimeWithMilliseconds(),
-                         filename,
-                         getFileExtension(filename));
-
-                // 写入文件
-                FILE* ofs = fopen(filePath, "wb");
-                if (ofs == NULL) {
-                    free(data);
-                    return false;
-                }
-
-                // 获取文件内容并写入文件
-                char* content_start = strstr(boundary_pos, CRLF CRLF);
-                if (content_start != NULL) {
-                    content_start += strlen(CRLF CRLF);
-                    size_t content_len = next_part - content_start;
-                    fwrite(content_start, 1, content_len, ofs);
-                }
-
-                fclose(ofs);
-                printf("File saved to: %s\n", filePath);
-            }
-        }
-        boundary_pos = next_part + strlen(boundary);
-        next_part = strstr(boundary_pos, boundary);
-    }
-
-    free(data);
-    return true;
-}
-
-// 主函数，模拟处理 API 请求
-bool handle_api_request(const char* body, size_t body_len, const char* path) {
-    if (strcmp(path, "/api/RegFace") == 0) {
-		printf("handle_api_request: %s:%s\r\n111111111111",body,path);
-        size_t st = 0, ed = 0;
-        ed = strstr(body, CRLF) - body;  // 查找 CRLF 分隔符
-        char boundary[128];
-        strncpy(boundary, body, ed);
-        boundary[ed] = '\0';
-
-        printf("Boundary: %s\n", boundary);
-
-        // 解析表单数据并保存文件
-        if (!parseFormDataAndSaveFile(body, body_len, boundary)) {
-            printf("Error while parsing form data\n");
-            return false;
-        }
-
-        // 这里你可以发送响应数据
-        printf("File successfully saved.\n");
-
-        return true;
-    }
-
-    // 如果路径不匹配，返回失败
-    return false;
-}
-
 static inline bool handle_http_client_request(CLIENT * client)
 {
 	SERVER_CONTEXT * c = &g_server_context;
@@ -618,22 +653,26 @@ static inline bool handle_http_client_request(CLIENT * client)
 	int i;
 	int path_len = strlen(client->hrc.relative_path);
 	int suffix_len = strlen(".html");
-	printf("handle_http_client_request11111: %s \r\n",client->hrc.relative_path);
+	printf("handle_http_client_request11111: %s\r\n",client->hrc.relative_path);
 	if ((path_len >= suffix_len) &&
 		(0 == strcasecmp(client->hrc.relative_path + path_len - suffix_len, ".html")))
 	{
-		if (0 == strcasecmp(client->hrc.relative_path, "/resources/login.html")
-		|| 0 == strcasecmp(client->hrc.relative_path, "/resources/RegFace.html"))
+		if (0 == strcasecmp(client->hrc.relative_path, "/search.html"))
 		{
-			printf("999999999: %s \r\n",client->hrc.relative_path);
 			return handle_search_html_request(client);
 			
 		}
 	}
 
-	handle_api_request(client->hrc.data, client->hrc.len, client->hrc.relative_path);
+	if(0 == strcasecmp(client->hrc.relative_path, API_PTZ) 
+	|| 0 == strcasecmp(client->hrc.relative_path, API_ZOOM)){
+		return handle_API_request(client);
+	}
 	
-
+	if(0 == strcasecmp(client->hrc.relative_path, API_RTCURL))
+	{
+		
+	}
 	// process common files
 	// http://www.cnblogs.com/campo/archive/2007/02/02/638348.aspx
 	static struct tagMIMEType {
@@ -668,7 +707,6 @@ static inline bool handle_http_client_request(CLIENT * client)
 		if ((path_len >= suffix_len) &&
 			(0 == strcasecmp(client->hrc.relative_path + path_len - suffix_len, mime_types[i].suffix)))
 		{
-			printf("handle_http_client_request222222:%s  %s\r\n",client->hrc.absolute_path,client->hrc.relative_path);
 			return make_http_client_file_resp(client, mime_types[i].content_type, client->hrc.absolute_path, NULL);
 		}	
 		
@@ -687,7 +725,6 @@ bool c_parse_http_client_recved_data(CLIENT * client, int len)
 	{
 	case RECV_HTTP_HEADER:
 		ret2 = http_request_parse(&client->hrc, c->buffer, len);
-		printf("22222222222222222222222222222222222222: %s  \r\n ************************** \r\n",c->buffer);
 		if (ret2 == HTTP_BAD_REQUEST)
 			ret = c_make_http_client_resp(client, 200, "Bad Request", "Can\'t parse request.");
 		else if (ret2 == HTTP_INTERNAL_ERROR)
@@ -860,7 +897,7 @@ static inline bool parse_unknown_client_recved_data(CLIENT * client, int len)
 
 static inline bool parse_client_recved_data(CLIENT * client, int len)
 {
-	printf("1111111 Enter %s %d\n", __func__,(int)client->type);
+	// printf("1111111 Enter %s %d\n", __func__,(int)client->type);
 	SERVER_CONTEXT * c = &g_server_context;
 	bool ret = false;
 
@@ -963,104 +1000,13 @@ void print_buf(char *buf, int len)
 	printf("\n");
 }
 
-// static inline void clients_handler()
-// {
-//     SERVER_CONTEXT * c = &g_server_context;
-//     struct list_head * pos, * next;
-//     CLIENT * client;
-//     int len;
-//     c->buffer = (char*)my_malloc(SERVER_BUFFER_SIZE);
-    
-//     if (c->buffer == NULL) {
-//         perror("Failed to allocate memory for client buffer");
-//         return;  
-//     }
-
-//     list_for_each_safe(pos, next, &c->clients_list)
-//     {
-//         client = list_entry(pos, CLIENT, list);
-
-//         // 如果客户端有可读数据
-//         if (FD_ISSET(client->sock, &c->r_fds))
-//         {
-//             FD_CLR(client->sock, &c->r_fds);
-            
-//             // 处理HTTP客户端
-//             if (client->type == HTTP_CLIENT)
-//             {
-//                 if ((client->http_period == RECV_HTTP_HEADER) || 
-//                     (client->http_period == RECV_HTTP_DATA))
-//                 {
-//                     client->tick = c->tick;
-//                 }
-//             }
-            
-//             // 对于UNKNOWN_CLIENT类型的客户端，我们需要处理其特殊数据
-//             if (client->type == UNKNOWN_CLIENT)
-//             {
-//                 len = recv(client->sock, c->buffer + client->len_of_temp_data_4_unknown_client, 
-//                            SERVER_BUFFER_SIZE - 1 - client->len_of_temp_data_4_unknown_client, 0);
-//             }
-//             else
-//             {
-//                 len = recv(client->sock, c->buffer, SERVER_BUFFER_SIZE - 1, 0);
-//             }
-
-//             // 如果接收数据长度为0或负数，说明客户端关闭或出现错误
-//             if (len <= 0)
-//             {
-//                 printf("remove_client\n");
-//                 remove_client(client);  
-//                 continue; // 处理下一个客户端
-//             }
-
-//             printf("recv:start************\r\n  %d : %s  99999999999999*********\r\n", len, c->buffer);
-            
-//             // 解析客户端接收到的数据
-//             if (!parse_client_recved_data(client, len))
-//             {
-//                 remove_client(client);  
-//                 continue; // 处理下一个客户端
-//             }
-//         }
-
-//         // 如果客户端有可写数据
-//         if (FD_ISSET(client->sock, &c->w_fds))
-//         {
-//             FD_CLR(client->sock, &c->w_fds);
-            
-//             // 处理HTTP客户端的发送
-//             if (client->type == HTTP_CLIENT)
-//             {
-//                 if (client->http_period == SEND_HTTP_RESULT)
-//                 {
-//                     client->tick = c->tick;
-//                 }
-//             }
-            
-//             // 发送客户端的数据
-//             if (!send_client_data(client))
-//             {
-//                 // 如果发送失败，可以添加相应的处理逻辑
-//             }
-//         }
-
-//         // 持续循环直到所有客户端的读写事件都处理完毕
-//     }
-// }
-
 static inline void clients_handler()
 {
 	SERVER_CONTEXT * c = &g_server_context;
 	struct list_head * pos, * next;
 	CLIENT * client;
 	int len;
-	// c->buffer = (char*)my_malloc(SERVER_BUFFER_SIZE);
-	if (c->buffer == NULL) {
-		perror("Failed to allocate memory for client buffer");
-		return;	  
-	}
-	int boundary_found = 0;
+
 	list_for_each_safe(pos, next, &c->clients_list)
 	{
 		client = list_entry(pos, CLIENT, list);
@@ -1074,21 +1020,22 @@ static inline void clients_handler()
 					(client->http_period == RECV_HTTP_DATA))
 					client->tick = c->tick;
 			}
+			
 			if (client->type == UNKNOWN_CLIENT)
 				len = recv(client->sock, c->buffer + client->len_of_temp_data_4_unknown_client, SERVER_BUFFER_SIZE - 1 - client->len_of_temp_data_4_unknown_client, 0);
 			else
 				len = recv(client->sock, c->buffer, SERVER_BUFFER_SIZE - 1, 0);
 
 			//printf("%s",c->buffer);
-			printf("recv:start************\r\n  %d : %s \n",len,c->buffer);
+			printf("recv %d",len);
 			//print_buf(c->buffer,len);
-			if (len <= 0)
+			if (0 >= len)
 			{
 				printf("remove_client\n");
 				remove_client(client);	
 				continue;
 			}
-			else if (! parse_client_recved_data(client, len))
+			if (! parse_client_recved_data(client, len))
 			{
 				remove_client(client);	
 				continue;

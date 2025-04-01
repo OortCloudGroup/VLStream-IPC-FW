@@ -28,6 +28,7 @@ LIBRARIES = \
 CPP_SRCS = \
     $(HOME_BASE)/src/recordpushrtc.cpp \
     $(HOME_BASE)/src/recordpushrtc_capi.cpp \
+    $(HOME_BASE)/src/yangrecordthread.cpp \
     $(HOME_BASE)/src/yangpush/YangPushCapture.cpp \
     $(HOME_BASE)/src/yangpush/YangPushEncoder.cpp \
     $(HOME_BASE)/src/yangpush/YangPushFactory.cpp \
@@ -57,5 +58,5 @@ main: main.c librecordpush.a
 # 清理
 clean:
 	rm -f $(OBJS) librecordpush.a main.o main
-	rm -f $(MYLIB)\$(STATICEXE)
+	rm -f $(MYLIB)/$(STATICEXE)
 	

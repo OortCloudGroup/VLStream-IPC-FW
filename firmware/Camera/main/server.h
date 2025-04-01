@@ -59,7 +59,7 @@
 #include "lua/lualib.h"
 
 
-#include "vls_record.h"
+//#include "vls_record.h"
 #include "vls_rtsp_server.h"
 #include "c_queue_frame.h"
 #include "vls_server.h"

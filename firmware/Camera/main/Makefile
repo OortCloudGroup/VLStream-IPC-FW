@@ -20,6 +20,8 @@ ifeq ($(USE_SSL),y)
 EXTRALIB += -lssl -lcrypto 
 endif
 
+#-------------------------------------------------  vls_record.o
+OBJS = server.o vls_rtsp_server.o vls_server.o c_h264_encoder.o c_queue_frame.o c_rtsp_server.o vls_upload.o vls_webrtc_push.o
 
 #------------------------------------------------- 
 OBJS = server.o vls_record.o vls_rtsp_server.o vls_server.o c_h264_encoder.o c_queue_frame.o c_rtsp_server.o vls_upload.o vls_webrtc_push.o

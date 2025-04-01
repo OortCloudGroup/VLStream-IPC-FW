@@ -32,6 +32,12 @@ void start_push_camera(void* handle , const char* url)
     obj->startRecordPushWeb(url);
 }
 
+void set_video_yuv_callback(void* handle, VideoFrameCallback callback)
+{
+    RecordPushRtc* obj = static_cast<RecordPushRtc*>(handle);
+    obj->setVideoCallback(callback);
+}
+
 void record_push_destroy(void* handle) {
     delete static_cast<RecordPushRtc*>(handle);
 }

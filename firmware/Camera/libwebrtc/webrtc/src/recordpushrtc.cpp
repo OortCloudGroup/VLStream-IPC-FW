@@ -85,6 +85,11 @@ void RecordPushRtc::initMessage()
 {
     m_message =  m_mf.createPushMessageHandle(m_hasAudio,false,m_videoType,&m_screenInfo,&m_outInfo,m_context,this,this);
     m_message->start();
+
+    m_rt.initPara(m_context);
+    m_rt.start();
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    initPreview();
 }
 
 void RecordPushRtc::startRecordPushWeb(const char* url)
@@ -105,6 +110,27 @@ void RecordPushRtc::initPreview()
         yang_post_message(YangM_Push_StartVideoCapture,0,NULL);
     }else if(m_videoType==Yang_VideoSrc_OutInterface){
         yang_post_message(YangM_Push_StartOutCapture,0,NULL);
+    }
+}
+
+  // 设置视频帧回调（供C API调用）
+void RecordPushRtc::setVideoCallback(VideoFrameCallback callback) {
+    m_videoCallback = callback;
+
+    m_rt.setVideoCallback([this](const uint8_t* data, int w, int h, int len) {
+        // 将 YangRecordThread 的回调转发到 C 语言接口
+        // if (m_videoCallback) {
+        //     m_videoCallback(data, w, h, len, m_userdata);
+        // }
+        onVideoFrame(data, w, h, len);
+    });
+
+}
+
+void RecordPushRtc::onVideoFrame(const uint8_t *data, int32_t width, int32_t height, int32_t length)
+{
+    if (m_videoCallback) {
+        m_videoCallback(data, width, height, length);
     }
 }
 
@@ -138,28 +164,26 @@ void RecordPushRtc::receiveSysMessage(YangSysMessage *mss, int32_t err)
             break;
         case YangM_Push_StartScreenCapture:
             if(m_context->avinfo.video.videoEncoderFormat==YangArgb)
-                m_videoBuffer=NULL;
+                m_rt.m_videoBuffer=NULL;
             else
-                m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
-            std::cout<<"message==="<<m_message<<"..prevideobuffer==="<<m_videoBuffer<<"....ret===="<<err;
+                m_rt.m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
+            std::cout<<"message==="<<m_message<<"..prevideobuffer==="<<m_rt.m_videoBuffer<<"....ret===="<<err;
             break;
         case YangM_Push_StartVideoCapture:
         {
-            m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
-            std::cout<<"message==="<<m_message<<"..prevideobuffer==="<<m_videoBuffer<<"....ret===="<<err;
+            m_rt.m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
             break;
         }
         case YangM_Push_StartOutCapture:
         {
-            m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
-            std::cout<<"message==="<<m_message<<"..prevideobuffer==="<<m_videoBuffer<<"....ret===="<<err;
+            m_rt.m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
             break;
         }
         case YangM_Push_SwitchToCamera:
-            m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
+            m_rt.m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
             break;
         case YangM_Push_SwitchToScreen:
-            m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
+            m_rt.m_videoBuffer=m_pushfactory.getPreVideoBuffer(m_message);
             break;
         }
 }
